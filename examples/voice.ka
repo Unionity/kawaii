@@ -1,0 +1,22 @@
+$voice=Character("Strange Voice", "wheat", "images/sv", "jpg")
+$me=Character("Me", "white", "", "")
+ACT INIT
+@background("images/void.jpg")
+voice: "Hello..."
+voice: "Hello there"
+@choice("Who is there?"=>"@goto('WHO')", "Run away"=>"@goto('DREAM')")
+/ACT
+ACT WHO
+voice: "I am a voice in your head..."
+voice: "Here I am..."
+@appear(voice)
+@mov(voice, 150)
+@sprite(voice, "talking")
+voice: "Boo"
+@goto('DREAM')
+/ACT
+ACT DREAM
+@background("images/nothing.jpg")
+me: "Then I woke up and it was a dream..."
+die
+/ACT
