@@ -1,0 +1,31 @@
+.kawaii_viewport {
+  font-family: sans-serif;
+}
+.kawaii_menu {
+  color: white;
+  background-color: #0000aa;
+}
+.kawaii_menu * {
+  opacity: 1;
+}
+.kawaii_menu > ul > li:hover {
+  color: black;
+  background-color: #ffff55;
+}
+.kawaii_menu > a:hover {
+  color: black;
+  background-color: #ffff55;
+}
+.kawaii_toolbar {
+  color: white;
+  background-color: #0000aa;
+}
+.kawaii_toolbar > a:hover {
+  color: black;
+  background-color: #ffff55;
+}
+.kawaii_text {
+  color: white;
+  background-color: #0000aa;
+  opacity: 0.8;
+}

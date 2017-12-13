@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.2//EN" "http://www.openmobilealliance.org/tech/DTD/xhtml-mobile12.dtd">
+<html lang="en-us">
+  <head>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="kawaii_base.css" />
+    <link rel="stylesheet" href="Plain/Plain.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kawaii.js - visual novel engine.</title>
+  </head>
+  <body>
+    <h1>Kawaii.js</h1>
+    <h2>A visual novel engine.</h2>
+    <h2 style="color: #2b2b2b;">Example</h2>
+    <p>Note: you better play this demo on PC.</p>
+    <div class=Kawaii></div>
+    <div id=By><p><img src="moemoesoft.bmp" alt="MoeMoeSoft" /><br/>By MoeMoeSoft</p></div>
+    <div id=Pink></div>
+    <script id=Script type="application/vnd.kawaii.actscript">
+$voice=Character("Strange Voice", "wheat", "images/sv", "jpg")
+$me=Character("Me", "white", "", "")
+ACT INIT
+@background("images/void.jpg")
+voice: "Hello..."
+voice: "Hello there"
+@choice("Who is there?"=>"@goto('WHO')", "Run away"=>"@goto('DREAM')")
+/ACT
+ACT WHO
+voice: "I am a voice in your head..."
+voice: "Here I am..."
+@appear(voice)
+@mov(voice, 150)
+@sprite(voice, "talking")
+voice: "Boo"
+@goto('DREAM')
+/ACT
+ACT DREAM
+@background("images/nothing.jpg")
+me: "Then I woke up and it was a dream..."
+die
+/ACT
+    </script>
+    <script src="Kawaii.js"></script>
+    <script>
+      let novel=new Kawaii({id:'example'}, ".Kawaii", document.querySelector("#Script").innerHTML);
+      novel.start();
+    </script>
+  </body>
+</html>

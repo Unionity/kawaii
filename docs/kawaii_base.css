@@ -1,0 +1,96 @@
+@keyframes blink {
+   from {
+      opacity: 1.000;
+   }
+   to {
+      opacity: 0.000;
+   }
+}
+.kawaii_container {
+  padding: 10px;
+  border: 5px #a5dbff outset;
+  background: #91d3ff;
+  display: inline-block;
+}
+.kawaii_lock {
+   position: absolute;
+   right: 0;
+   margin: 5px;
+   animation-name: blink;
+   animation-duration: 1.5s;
+   animation-iteration-count: infinite;
+   animation-direction: alternate-reverse;
+   display: none;
+}
+.kawaii_viewport {
+  z-index: 100;
+  background: #000;
+  width: 720px;
+  height: 480px;
+  position: relative;
+}
+.kawaii_link {
+  color: #fff;
+  text-decoration: none;
+}
+.kawaii_background {
+  z-index: 200;
+  position: relative;
+  width: 100%;
+  height:100%;
+}
+.kawaii_background *{
+  z-index: 250;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 100%;
+  min-height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+}
+.kawaii_front {
+  z-index: 280;
+  position: absolute;
+  bottom: 0;
+  color: wheat;
+  width: 100%;
+  height:100%;
+}
+.kawaii_front *{
+  position: absolute;
+  max-height: 80%;
+  right: 0pc;
+  bottom: 0pc;
+}
+.kawaii_front img{
+  transition: opacity 1.2s, right 1.2s;
+  transition-timing-function: ease-in-out;
+}
+.kawaii_text {
+  z-index: 300;
+  width: 100%;
+  height: 25%;
+  bottom: 0;
+  margin-bottom: 5%;
+  position: absolute;
+}
+.kawaii_name {
+  margin: 0!important;
+}
+.kawaii_toolbar {
+  z-index: 1000;
+  width: 100%;
+  height: 5%;
+  bottom: 0;
+  position: absolute;
+}
+.kawaii_menu {
+  z-index: 2000;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+  padding: 10px;
+  position: absolute;
+}
