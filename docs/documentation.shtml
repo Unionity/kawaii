@@ -1,0 +1,32 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.2//EN" "http://www.openmobilealliance.org/tech/DTD/xhtml-mobile12.dtd">
+<html lang="en-us">
+  <head>
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kawaii.js - visual novel engine.</title>
+  </head>
+  <body>
+    <h1>Kawaii.js</h1>
+    <h2>A visual novel engine.</h2>
+    <h3>Basics</h3>
+    <h4>Creating a novel</h4>
+    <p>To create a novel you will need to create a html file. Let's call it 'index.html'. Then connect Kawaii.js. Then you should write novel script and start the novel using <xhr>.start()</xhr> method.</p>
+    <strong>Contents of index.html: </strong><br/>
+    <xhr>
+    &lt;DOCTYPE html&gt;
+    &lt;html&gt
+    &lt;head&gt;
+    &lt;title&gt;Example Novel&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+    &lt;div class=Kawaii &gt;&lt;/div&gt;
+    &lt;script src="libs/Kawaii.js" &gt;&lt;/script&gt;
+    &lt;script id=Script type="application/x-vnd.kawaii.acts"&gt;&lt;/script&gt;
+    &lt;script&gt;&lt;/script&gt;
+    &lt;/html&gt;
+    </xhr>
+    <hr/>
+    <em>This page is under construction…</em>
+    <div id=By><p><img src="moemoesoft.bmp" alt="MoeMoeSoft" /><br/>By MoeMoeSoft</p></div>
+    <div id=Pink></div>
+  </body>
