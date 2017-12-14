@@ -12,6 +12,9 @@ function ParseException(message) {
    this.message=message;
    this.name="Fatal parser exception";
 }
+function kawaiiSave(act, position) {
+    
+}
 function kawaiiClarifyValue(value) {
    if(value.match(/(?<=")(.*)(?=")/gmiu)!==null) {
       return value.match(/(?<=")(.*)(?=")/gmiu)[0];
@@ -233,8 +236,12 @@ function Kawaii(config={}, target="#kawaii_default", script="", scriptPath) {
       let act="INIT";
       let pos=0;
       let save="";
-      var DEFAULT_KEY={alg: "A256CTR", ext: true, k: "b5kAYh5q8C7Se2JnaCxRj_gaFHF7n80QY7Jdue0s5uI", key_ops: ["encrypt", "decrypt", "wrapKey", "unwrapKey"], kty: "oct"};
-      window.crypto.subtle.importKey("jwk", {kty: "oct", k: "b5kAYh5q8C7Se2JnaCxRj_gaFHF7n80QY7Jdue0s5uI", alg: "A256CTR", ext: true}, {name: "AES-CTR"}, true, ["encrypt", "decrypt", "wrapKey", "unwrapKey"]).then(function(key){DEFAULT_KEY=key;});
+      if(window.isSecureContext) {
+        console.info("Context is secure, key is going to be defined.");
+        window.crypto.subtle.importKey("jwk", {kty: "oct", k: "b5kAYh5q8C7Se2JnaCxRj_gaFHF7n80QY7Jdue0s5uI", alg: "A256CTR", ext: true}, {name: "AES-CTR"}, true, ["encrypt", "decrypt", "wrapKey", "unwrapKey"]).then(function(key){const DEFAULT_KEY=key;});
+      } else {
+        console.warning("Context is insecure, protected saves is not going to be used!");
+      }
       const SAVE_STORAGE=openDatabase("kawaiiStorage__"+uid, "1.0.0.0.0.00", "kawaii Saves Storage Database (Application ID: "+uid+")", 9007199254740991);
       function readNext() {
          if(next) {
