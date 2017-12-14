@@ -3,30 +3,96 @@
   <head>
     <link rel="stylesheet" href="styles.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Kawaii.js - visual novel engine.</title>
+    <title>Kawaii.js Documentation Book.</title>
+    <style>.code { background: #000; color: #fff; overflow-x: scroll; white-space: nowrap; padding: 6pt; border-radius: 5pt; }</style>
   </head>
   <body>
     <h1>Kawaii.js</h1>
     <h2>A visual novel engine.</h2>
-    <h3>Basics</h3>
+    <article>
+    <a name="Basics"></a>
+    <h3 style="color: #2b2b2b;">Basics</h3>
     <h4>Creating a novel</h4>
     <p>To create a novel you will need to create a html file. Let's call it 'index.html'. Then connect Kawaii.js. Then you should write novel script and start the novel using <xhr>.start()</xhr> method.</p>
     <strong>Contents of index.html: </strong><br/>
-    <xhr>
-    &lt;DOCTYPE html&gt;
-    &lt;html&gt
-    &lt;head&gt;
-    &lt;title&gt;Example Novel&lt;/title&gt;
-    &lt;/head&gt;
-    &lt;body&gt;
-    &lt;div class=Kawaii &gt;&lt;/div&gt;
-    &lt;script src="libs/Kawaii.js" &gt;&lt;/script&gt;
-    &lt;script id=Script type="application/x-vnd.kawaii.acts"&gt;&lt;/script&gt;
-    &lt;script&gt;&lt;/script&gt;
-    &lt;/html&gt;
-    </xhr>
+    <div class="code">
+    &lt;DOCTYPE html&gt;<br/>
+    &lt;html&gt<br/>
+    &lt;head&gt;<br/>
+    &lt;title&gt;Example Novel&lt;/title&gt;<br/>
+    &lt;/head&gt;<br/>
+    &lt;body&gt;<br/>
+    &lt;div class=Kawaii &gt;&lt;/div&gt;<br/>
+    &lt;script src="libs/Kawaii.js" &gt;&lt;/script&gt;<br/>
+    &lt;script id=Script type="application/x-vnd.kawaii.acts"&gt;&lt;/script&gt;<br/>
+    &lt;script&gt;&lt;/script&gt;<br/>
+    &lt;/html&gt;<br/>
+    </div>
+    <strong>Now let us write some novel script:</strong>
+    <p>To start writing you should define some variables. To define variable you should use $ followed by variable name and constructor. For example to create a character: </p>
+    <div class="code">$you=Character('You', 'white', ' ', ' ')</div>
+    <strong>Explanation: </strong>
+    <p>$ - variable defenition start,<br/>you - variable name,<br/>Character(name, color, spritesFolder, spritesExtension) - constructor of class Character</p>
+    <p>You can create as much characters and other variables as you want.</p>
+    <strong>Now let us get to scripting: </strong>
+    <p>Script is divided in acts. So you should define an act: <br/>
+    <div class="code">
+    ACT INIT<br/>
+    /ACT
+    </div>Now you have an INIT act. Every script should contain an init act. Now you can start the actual script. To make character speak use this construction:
+    <div class="code">&lt;Variable, that contains character&gt;: &lt;Variable or string with speech&gt;</div>
+    Now put it in your script:
+     <div class="code">
+    ACT INIT<br/>
+    you: "Hello world!"<br/>
+    /ACT
+    </div>
+    <strong>Ending novel</strong>
+    <p>To end novel use <div class="code">die</div> statement. It also deletes target element.</p>
+    <strong>Deploying novel</strong>
+    <p>Now when your script is ready, start the novel</p>
+    <p>To start novel create novel object:
+    <div class="code">let novel=new Kawaii({id:'exampleNovel'}, ".Kawaii", document.querySelector("#Script").innerHTML);<br/>
+    novel.start();</div>
+    <p>Contents of novel script:
+    <div class="code">
+    $you=Character('You', 'white', ' ', ' ')<br/>
+    ACT INIT<br/>
+    you: "Hello world!"<br/>
+    die<br/>
+    /ACT</div><br/>
+    Contents of index.html:
+     <div class="code">
+    &lt;DOCTYPE html&gt;<br/>
+    &lt;html&gt<br/>
+    &lt;head&gt;<br/>
+    &lt;title&gt;Example Novel&lt;/title&gt;<br/>
+    &lt;/head&gt;<br/>
+    &lt;body&gt;<br/>
+    &lt;div class=Kawaii &gt;&lt;/div&gt;<br/>
+    &lt;script src="libs/Kawaii.js" &gt;&lt;/script&gt;<br/>
+    &lt;script id=Script type="application/x-vnd.kawaii.acts"&gt;<br/>
+    $you=Character('You', 'white', ' ', ' ')<br/>
+    ACT INIT<br/>
+    you: "Hello world!"<br/>
+    die<br/>
+    /ACT<br/>
+    &lt;/script&gt;<br/>
+    &lt;script&gt;<br/>
+    let novel=new Kawaii({id:'exampleNovel'}, ".Kawaii", document.querySelector("#Script").innerHTML);<br/>
+    novel.start();<br/>
+    &lt;/script&gt;<br/>
+    &lt;/body&gt;<br/>
+    &lt;/html&gt;<br/>
+    </div>
+    </article>
+    <article>
+    <a name="Reference"></a>
+    <h3 style="color: #2b2b2b;">Reference</h3>
+    </article>
     <hr/>
     <em>This page is under construction…</em>
     <div id=By><p><img src="moemoesoft.bmp" alt="MoeMoeSoft" /><br/>By MoeMoeSoft</p></div>
     <div id=Pink></div>
-  </body>
+</body>
+</html>
