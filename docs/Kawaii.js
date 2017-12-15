@@ -10,7 +10,6 @@ const KawaiiTypes = {
   Keyword: 3, //keyword
   VariableDefenition: 4, //$a=Character();
   Speech: 6, //a: "b"
-  Comment: 8 //?comment
 }
 var KawaiiFunctions = {
   appear: function(parameters) {
@@ -264,6 +263,7 @@ function kawaiiReadScriptFromString(script) {
 }
 
 function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath) {
+  script=script.replace(/(rem (.*))|(\(\*(.*)*\*\))|(\$!(.*))/gmiu, ""); //remove comments
   if ("undefined" !== typeof scriptPath) {
     this.story = kawaiiReadScriptFromFile(scriptPath);
   } else {
