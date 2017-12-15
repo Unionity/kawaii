@@ -348,7 +348,7 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
     } else {
       console.warn("Warning! Context is not secure, so encrypted saves is disabled!");
     }
-    const SAVE_STORAGE = window.indexedDB.open("kawaiiStorage__" + uid, "1");
+    const SAVE_STORAGE = window.indexedDB.open("kawaiiStorage__" + uid, 1);
     if (storyScript["script"]["type"]!==0) {
       console.error("Script does not appears to be of type ActArray! Type 0 (ActArray) expected, but "+storyScript["type"]+" given!");
       return false;

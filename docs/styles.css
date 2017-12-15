@@ -1,34 +1,61 @@
 html {
-    font-family: monospace;
+  font-family: monospace;
 }
 body {
-    margin: 0!important;
+  margin: 0!important;
+}
+article {
+  padding: 10pt;
 }
 h1, h2 {
-    font-weight: 10;
-    margin: 5px!important;
+  font-weight: 10;
+  margin: 5px!important;
 }
 h2 {
-    color: darkgrey;
+  color: darkgrey;
 }
 xhr {
-    background: grey;
-    padding: 1px;
-    border-radius: 4px;
+  background: grey;
+  padding: 1px;
+  border-radius: 4px;
 }
 .Description {
-    padding-left: 5px;
+  padding-left: 5px;
+}
+.doc_name {
+  color: #2b2b2b;
+}
+.code {
+  background: #000;
+  color: #fff;
+  overflow-x: scroll;
+  white-space: nowrap;
+  padding: 6pt;
+  border-radius: 5pt;
+  margin: 10pt;
+}
+.warning {
+  color: orange;
+  font-weight: 700;
+}
+#Latest {
+  color: white;
+  padding: 20pt;
+  padding-top: 5pt;
+  padding-bottom: 5pt;
+  margin-bottom: 5pt;
+  background: lightpink;
 }
 #Pink {
-    position: fixed;
-    bottom: 0;
-    height: 15px;
-    width: 100%;
-    background: pink;
+  position: fixed;
+  bottom: 0;
+  height: 15px;
+  width: 100%;
+  background: pink;
 }
 #By {
-    position: fixed;
-    bottom: 16px;
-    right: 5pc;
-    display: inline-block;
+  position: fixed;
+  bottom: 16px;
+  right: 5pc;
+  display: inline-block;
 }
