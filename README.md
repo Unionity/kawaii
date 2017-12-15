@@ -1,3 +1,3 @@
 # Kawaii
-![License](https://img.shields.io/badge/License-EPL-orange.svg?style=plastic)
+![License](https://img.shields.io/badge/License-EPL-orange.svg?style=plastic) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/baf7137ebb9942f88a39dbe5eef3e1ae)](https://www.codacy.com/app/kitsuruko/kawaii?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=moemoesoft/kawaii&amp;utm_campaign=Badge_Grade)  
 Kawaii.js is an open-source, free to use visual novel engine. It uses Kawaii Acts Scripting Language (.ka) to render visual novels in browser window using HTML.

@@ -3,6 +3,14 @@ let storyScript;
 /**
  * Metadata about engine version
  */
+ const kawaiiMeta = {
+  version: "0.0.1alpha",
+  parserVersion: "same",
+  release: false
+};
+/**
+ * Functions, types, statements...
+ */
 const KawaiiTypes = {
   ActArray: 0, //a.k.a. Script
   Act: 1,
@@ -95,11 +103,6 @@ var KawaiiKeywords = {
     //TODO save
   }
 }
-const kawaiiMeta = {
-  'version': '0.0.1alpha',
-  'parserVersion': 'same',
-  'release': false
-};
 
 function ParseException(message) {
   this.message = message;
@@ -222,29 +225,29 @@ function kawaiiReadVariableFromString(variable, definition, script) {
   var variableType = definition.match(/.+?(?=\()/gmiu)[0];
   var variableParameters = definition.match(/(\((.*)\))/gmiu)[0].replace(/\(||\)/gmiu, '').split(",");
   switch (variableType) {
-    case 'Character':
+    case "Character":
     if (variableParameters.length == 4) {
       script["variables"][variable] = {
-        'type': 'character',
-        'name': kawaiiClarifyValue(variableParameters[0]),
-        'color': kawaiiClarifyValue(variableParameters[1]),
-        'folder': kawaiiClarifyValue(variableParameters[2]),
-        'extension': kawaiiClarifyValue(variableParameters[3])
+        type: "character",
+        name: kawaiiClarifyValue(variableParameters[0]),
+        color: kawaiiClarifyValue(variableParameters[1]),
+        folder: kawaiiClarifyValue(variableParameters[2]),
+        extension: kawaiiClarifyValue(variableParameters[3])
       };
     } else {
       throw new ParseException("Character constructor expects 4 parameters, but " + variableParameters.length + " given!");
     }
     break;
-    case 'Alias':
+    case "Alias":
     script["variables"][variable] = {
-      'type': 'alias',
-      'value': variableParameters[0].replace(/"/gmiu, "")
+      type: "alias",
+      value: variableParameters[0].replace(/"/gmiu, "")
     };
     break;
-    case 'Variable':
+    case "Variable":
     script["variables"][variable] = {
-      'type': 'variable',
-      'value': variableParameters[0].replace(/"/gmiu, "")
+      type: "variable",
+      value: variableParameters[0].replace(/"/gmiu, "")
     };
     break;
     default:
@@ -257,8 +260,8 @@ function kawaiiReadVariableFromString(variable, definition, script) {
 
 function kawaiiReadScriptFromString(script) {
   return {
-    'variables': {},
-    'script': kawaiiReadActsFromString(script)
+    variables: {},
+    script: kawaiiReadActsFromString(script)
   };
 }
 
