@@ -51,7 +51,7 @@ var KawaiiFunctions = {
   goto: function(parameters) {
     window.Kawaii.current.Act = kawaiiClarifyValue(parameters[0]);
     window.Kawaii.current.Position = 0;
-    kawaiiChangeLockState();;
+    kawaiiChangeLockState();
   },
   halt: function(parameters) {
     window.Kawaii.current.Next = window.Kawaii.current.Next;
@@ -79,7 +79,7 @@ var KawaiiFunctions = {
     document.querySelector(".kawaii_lock").style.display = "inline-block";
     window.setTimeout(function() {
       document.querySelector(".kawaii_lock").style.display = "none";
-    }, parameters[0]);;
+    }, parameters[0]);
   },
   choice: function(parameters) {
     let options = [];
