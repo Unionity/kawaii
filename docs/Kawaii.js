@@ -4,7 +4,7 @@ let storyScript;
  * Metadata about engine version
  */
  const kawaiiMeta = {
-  version: "0.0.1alpha",
+  version: "0.0.0.1alpha",
   parserVersion: "same",
   release: false
 };
