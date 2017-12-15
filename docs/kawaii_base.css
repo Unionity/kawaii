@@ -6,6 +6,14 @@
       opacity: 0.000;
    }
 }
+@keyframes next {
+   from {
+      right: 5pt;
+   }
+   to {
+      right: 10pt;
+   }
+}
 .kawaii_container {
   padding: 10px;
   border: 5px #a5dbff outset;
@@ -93,4 +101,14 @@
   transform: translate(-50%, -50%);
   padding: 10px;
   position: absolute;
+}
+.kawaii_next {
+  animation-name: next;
+  animation-duration: 0.5s;
+  animation-iteration-count: infinite;
+  animation-direction: alternate-reverse;
+  position: absolute;
+  right: 5pt;
+  bottom: 5pt;
+  text-decoration: none;
 }

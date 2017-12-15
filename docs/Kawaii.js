@@ -15,36 +15,36 @@ const KawaiiTypes = {
 var KawaiiFunctions = {
   appear: function(parameters) {
     document.querySelector(".kawaii_front").innerHTML += "<img id='kawaii_CHARACTERSPRITE___" + parameters[0] + "' src='" + storyScript["variables"][parameters[0]]["folder"] + "/index." + storyScript["variables"][parameters[0]]["extension"] + "' />";
-    window.Kawaii.current.Next = !window.Kawaii.current.Next;
+    kawaiiChangeLockState();
   },
   dispose: function(parameters) {
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).outerHTML = "";
-    window.Kawaii.current.Next = !window.Kawaii.current.Next;
+    kawaiiChangeLockState();
   },
   hide: function(parameters) {
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).style.opacity = "0.000";
-    window.Kawaii.current.Next = !window.Kawaii.current.Next;
+    kawaiiChangeLockState();
   },
   show: function(parameters) {
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).style.opacity = "1.000";
-    window.Kawaii.current.Next = !window.Kawaii.current.Next;
+    kawaiiChangeLockState();
   },
   mov: function(parameters) {
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).style.right = document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).style.right + parameters[1] + "pt";
-    window.Kawaii.current.Next = !window.Kawaii.current.Next;
+    kawaiiChangeLockState();
   },
   background: function(parameters) {
     document.querySelector(".kawaii_background").innerHTML = "<img src='" + kawaiiClarifyValue(parameters[0]) + "' alt='" + kawaiiClarifyValue(parameters[0]) + "' />";
-    window.Kawaii.current.Next = !window.Kawaii.current.Next;
+    kawaiiChangeLockState();
   },
   sprite: function(parameters) {
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).src = storyScript["variables"][parameters[0]].folder + "/" + kawaiiClarifyValue(parameters[1]) + "." + storyScript["variables"][parameters[0]].extension;
-    window.Kawaii.current.Next = !window.Kawaii.current.Next;
+    kawaiiChangeLockState();
   },
   goto: function(parameters) {
     window.Kawaii.current.Act = kawaiiClarifyValue(parameters[0]);
     window.Kawaii.current.Position = 0;
-    window.Kawaii.current.Next = !window.Kawaii.current.Next;;
+    kawaiiChangeLockState();;
   },
   halt: function(parameters) {
     window.Kawaii.current.Next = window.Kawaii.current.Next;
@@ -61,13 +61,13 @@ var KawaiiFunctions = {
   },
   video: function(parameters) {
     document.querySelector(".kawaii_background").innerHTML = "<video autoplay nodownload><source src='" + parameters[0].match(/(?<=")(.*)(?=")/gmiu)[0] + "'></source></video>";
-    window.Kawaii.current.Next = !window.Kawaii.current.Next;
+    kawaiiChangeLockState();
     window.Kawaii.current.Position++;
     readNext();
   },
   lock: function(parameters) {
     window.setTimeout(function() {
-      window.Kawaii.current.Next = !window.Kawaii.current.Next;
+      kawaiiChangeLockState();
     }, parameters[0]);
     document.querySelector(".kawaii_lock").style.display = "inline-block";
     window.setTimeout(function() {
@@ -112,6 +112,16 @@ function InterpretException(message) {
   this.name = "Interpreter exited with error";
 }
 
+function kawaiiChangeLockState() {
+  if(window.Kawaii.current.Next) {
+    window.Kawaii.current.Next = !window.Kawaii.current.Next;
+    document.querySelector(".kawaii_next").style.opacity="0.000";
+  } else {
+    window.Kawaii.current.Next = !window.Kawaii.current.Next;
+    document.querySelector(".kawaii_next").style.opacity="1.000";
+  }
+}
+
 function kawaiiClarifyValue(value) {
   if (value.match(/(?<=")(.*)(?=")/gmiu) !== null) {
     return value.match(/(?<=")(.*)(?=")/gmiu)[0];
@@ -128,8 +138,8 @@ function kawaiiClarifyValue(value) {
 /**
  * Function that does typewriter effect on the target element.
  */
-function kawaiiTypewriter(txt, target, delay = 55) {
-  var i = 0;
+function kawaiiTypewriter(txt, target, delay = 25) {
+  let i = 0;
 
   function write() {
     document.querySelector(target).innerHTML = txt.substring(0, i);
@@ -264,7 +274,6 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
      * Line interpreter
      */
     function evaluate(statement) {
-      console.log(statement);
       switch(statement["type"]) {
         case 2: //@Function()
         if(typeof KawaiiFunctions[statement["name"]] == "undefined") {
@@ -282,14 +291,14 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
         break;
         case 4: //variable defenition
         kawaiiReadVariableFromString(statement["name"], statement["definition"], storyScript);
-        window.Kawaii.current.Next = !window.Kawaii.current.Next;
+        kawaiiChangeLockState();
         break;
         case 6:
         if(storyScript["variables"][statement["character"]]["type"]=="character") {
           document.querySelector(".kawaii_name").style.color=storyScript["variables"][statement["character"]]["color"];
           document.querySelector(".kawaii_name").innerHTML=storyScript["variables"][statement["character"]]["name"];
           kawaiiTypewriter(kawaiiClarifyValue(statement["text"]), ".kawaii_line");
-          setTimeout(function(){window.Kawaii.current.Next=!window.Kawaii.current.Next;}, kawaiiClarifyValue(statement["text"]).length*65);
+          setTimeout(function(){kawaiiChangeLockState();}, kawaiiClarifyValue(statement["text"]).length*25);
         } else {
            throw ParseException("Error parsing input! Expected variable of type Character, but variable of type "+storyScript["variables"][statement[0].replace(' ','')]["type"]+" given!");
         }
@@ -335,12 +344,12 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
     }
     function readNext() {
       if (window.Kawaii.current.Next) {
-        window.Kawaii.current.Next = !window.Kawaii.current.Next;
+        kawaiiChangeLockState();
         evaluate(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]);
         window.Kawaii.current.Position++;
       }
     }
-    document.querySelector(target).outerHTML = '<div class="kawaii_container" id="kawaii__' + uid.replace(".", "_") + '" align="left" ><div class="kawaii_viewport"><div class="kawaii_menu" style="display: none;"></div><div class="kawaii_background"></div><div class="kawaii_front" align="center"></div><div class="kawaii_text"><h4 class="kawaii_name"></h4><p class="kawaii_line"></p></div><div class="kawaii_toolbar">&nbsp;&nbsp;<strong class="kawaii_lock"><em>LOCK</em></strong></div></div>';
+    document.querySelector(target).outerHTML = '<div class="kawaii_container" id="kawaii__' + uid.replace(".", "_") + '" align="left" ><div class="kawaii_viewport"><div class="kawaii_menu" style="display: none;"></div><div class="kawaii_background"></div><div class="kawaii_front" align="center"></div><div class="kawaii_text"><h4 class="kawaii_name"></h4><p class="kawaii_line"></p><ins class="kawaii_next">&#x21db;</ins></div><div class="kawaii_toolbar">&nbsp;&nbsp;<strong class="kawaii_lock"><em>LOCK</em></strong></div></div>';
     document.querySelector(".kawaii_front").addEventListener('click', function() {
       readNext();
     }, {
