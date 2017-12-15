@@ -60,7 +60,7 @@ var KawaiiFunctions = {
     }
   },
   video: function(parameters) {
-    document.querySelector(".kawaii_background").innerHTML = "<video autoplay nodownload><source src='" + parameters[0].match(/(?<=")(.*)(?=")/gmiu)[0] + "'></source></video>";
+    document.querySelector(".kawaii_background").innerHTML = "<video autoplay nodownload><source src='" + kawaiiClarifyValue(parameters[0]) + "'></source></video>";
     kawaiiChangeLockState();
     window.Kawaii.current.Position++;
     readNext();
@@ -78,7 +78,7 @@ var KawaiiFunctions = {
     let options = [];
     let htmlOptions = "";
     parameters.forEach(function(choice) {
-      let opt = [choice.split('=>')[0].match(/(?<=")(.*)(?=")/gmiu)[0].replace(/\\"/gmiu, '"'), choice.split('=>')[1].match(/(?<=")(.*)(?=")/gmiu)[0].replace(/\\"/gmiu, '"')];
+      let opt = [kawaiiClarifyValue(choice.split('=>')[0]).replace(/\\"/gmiu, '"'), kawaiiClarifyValue(choice.split('=>')[1]).replace(/\\"/gmiu, '"')];
       options.push(opt);
     });
     options.forEach(function(opt) {
@@ -123,10 +123,10 @@ function kawaiiChangeLockState() {
 }
 
 function kawaiiClarifyValue(value) {
-  if (value.match(/(?<=")(.*)(?=")/gmiu) !== null) {
-    return value.match(/(?<=")(.*)(?=")/gmiu)[0];
-  } else if (value.match(/(?<=')(.*)(?=')/gmiu) !== null) {
-    return value.match(/(?<=')(.*)(?=')/gmiu)[0];
+  if (value.match(/"(.*)"/gmiu) !== null) {
+    return value.match(/"(.*)"/gmiu)[0].replace(/"/gmiu, '');
+  } else if (value.match(/'(.*)'/gmiu) !== null) {
+    return value.match(/'(.*)'/gmiu)[0].replace(/'/gmiu, '');
   } else {
     if (storyScript["variables"][value.replace(/ /gmiu, "")]["type"] == "variable") {
       return storyScript["variables"][value.replace(/ /gmiu, "")]["value"];
@@ -172,7 +172,7 @@ function kawaiiReadStatement(line) {
     return {
       type: KawaiiTypes.Function,
       name: line.replace("@", "").match(/.+?(?=\()/gmiu)[0],
-      parameters: line.replace("@", "").match(/(?<=\()(.*)(?=\))/gmiu)[0].split(",")
+      parameters: line.replace("@", "").match(/(\((.*)\))/gmiu)[0].replace(/^\(/gmiu, '').replace(/\)$/gmiu, '').split(",")
     };
   } else {
     return {
@@ -213,7 +213,7 @@ function kawaiiReadVariableFromString(variable, definition, script) {
     throw new ParseException("Invalid variable defenition!");
   }
   var variableType = definition.match(/.+?(?=\()/gmiu)[0];
-  var variableParameters = definition.match(/(?<=\()(.*)(?=\))/gmiu)[0].split(",");
+  var variableParameters = definition.match(/(\((.*)\))/gmiu)[0].replace(/\(||\)/gmiu, '').split(",");
   switch (variableType) {
     case 'Character':
     if (variableParameters.length == 4) {
@@ -337,7 +337,7 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
     } else {
       console.warn("Warning! Context is not secure, so encrypted saves is disabled!");
     }
-    const SAVE_STORAGE = openDatabase("kawaiiStorage__" + uid, "1.0.0.0.0.00", "kawaii Saves Storage Database (Application ID: " + uid + ")", 9007199254740991);
+    const SAVE_STORAGE = window.indexedDB.open("kawaiiStorage__" + uid, "1");
     if (storyScript["script"]["type"]!==0) {
       console.error("Script does not appears to be of type ActArray! Type 0 (ActArray) expected, but "+storyScript["type"]+" given!");
       return false;
