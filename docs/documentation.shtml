@@ -4,11 +4,16 @@
     <link rel="stylesheet" href="styles.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Kawaii.js Documentation Book.</title>
-    <style>.code { background: #000; color: #fff; overflow-x: scroll; white-space: nowrap; padding: 6pt; border-radius: 5pt; }</style>
+    <style>.doc_name { color: #2b2b2b; } article { padding: 10pt; } .code { background: #000; color: #fff; overflow-x: scroll; white-space: nowrap; padding: 6pt; border-radius: 5pt; margin: 10pt;} .warning { color: orange; font-weight: 700; }</style>
   </head>
   <body>
     <h1>Kawaii.js</h1>
     <h2>A visual novel engine.</h2>
+    <h4>Changes without backwards comapatability</h4>
+    <ul class="warning">
+    <li>Since commit 08870e2, all constructions (incl. variable defenitions) should be inside acts.</li>
+    <li>Since commit 5019320, comments have got new syntax.</li>
+    </ul>
     <article>
     <a name="Basics"></a>
     <h3 style="color: #2b2b2b;">Basics</h3>
@@ -56,8 +61,8 @@
     novel.start();</div>
     <p>Contents of novel script:
     <div class="code">
-    $you=Character('You', 'white', ' ', ' ')<br/>
     ACT INIT<br/>
+    $you=Character('You', 'white', ' ', ' ')<br/>
     you: "Hello world!"<br/>
     die<br/>
     /ACT</div><br/>
@@ -72,8 +77,8 @@
     &lt;div class=Kawaii &gt;&lt;/div&gt;<br/>
     &lt;script src="libs/Kawaii.js" &gt;&lt;/script&gt;<br/>
     &lt;script id=Script type="application/x-vnd.kawaii.acts"&gt;<br/>
-    $you=Character('You', 'white', ' ', ' ')<br/>
     ACT INIT<br/>
+    $you=Character('You', 'white', ' ', ' ')<br/>
     you: "Hello world!"<br/>
     die<br/>
     /ACT<br/>
@@ -89,9 +94,410 @@
     <article>
     <a name="Reference"></a>
     <h3 style="color: #2b2b2b;">Reference</h3>
+    <a name="Reference/Comments"></a>
+    <h1>Comments</h1>
+    <a name="Reference/Comments/Rem"></a>
+    <h2 class="doc_name">Rem</h2>
+    <p>Comment construction, all following characters in line are ignored by interpreter.</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif") Rem Bob is my favourite character!<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    /ACT
+    </div>
+    <a name="Reference/Comments/$!"></a>
+    <h2 class="doc_name">$!</h2>
+    <p>Comment construction, all following characters in line are ignored by interpreter.</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif") $!Bob is my favourite character!<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    /ACT
+    </div>
+    <a name="Reference/Comments/(**)"></a>
+    <h2 class="doc_name">(*<em>value</em>*)</h2>
+    <p>Comment construction, all characters in between are ignored by interpreter.</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif") (*Bob is my favourite character!*)<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    /ACT
+    </div>
+    <a name="Reference/Keywords"></a>
+    <h1>Keywords</h1>
+    <p>Keywords is like functions, but without any possible parameters.</p>
+    <a name="Reference/Keywords/die"></a>
+    <h2 class="doc_name">die</h2>
+    <p>Destroys novel screen with neither saving any of the data nor prompting user.</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif")<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    bob: "Hello"<br/>
+    alice: "Bye"<br/>
+    die<br/>
+    /ACT
+    </div>
+    <a name="Reference/Keywords/save"></a>
+    <h2 class="doc_name">save</h2>
+    <strong class="warning">Not implemented</strong>
+    <p>Saving game as autosave.</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif")<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    bob: "Hello"<br/>
+    save<br/>
+    alice: "Bye"<br/>
+    die<br/>
+    /ACT
+    </div>
+    <a name="Reference/Keywords/load"></a>
+    <h2 class="doc_name">load</h2>
+    <strong class="warning">Not implemented</strong>
+    <p>Loading game from autosave.</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif")<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    bob: "Hello"<br/>
+    load<br/>
+    alice: "Bye"<br/>
+    die<br/>
+    /ACT
+    </div>
+    <a name="Reference/Keywords/halt"></a>
+    <h2 class="doc_name">halt</h2>
+    <strong class="warning">Not implemented</strong>
+    <p>See <a href="#Reference/Functions/@halt">@halt()</a>.</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif")<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    bob: "Hello"<br/>
+    halt<br/>
+    alice: "Bye" Rem never going to be executed<br/>
+    die<br/>
+    /ACT
+    </div>
+    <a name="Reference/Functions"></a>
+    <h1>Functions</h1>
+    <a name="Reference/Functions/@lock"></a>
+    <h2 class="doc_name">@lock(<em>time</em>)</h2>
+    <p>See <a href="#Reference/Functions/@pause">@pause()</a></p>
+    <a name="Reference/Functions/@pause"></a>
+    <h2 class="doc_name">@pause(<em>time</em>)</h2>
+    <p>Pervents execution for <em>time</em> seconds.</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif")<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    bob: "Hello"<br/>
+    alice: "Hi. Can you please wait for a few seconds?"<br/>
+    bob: "Ok!"<br/>
+    @pause(5000)<br/>
+    alice: "Thanks!" Rem is going to be be executed in 5 seconds.<br/>
+    die<br/>
+    /ACT
+    </div>
+    <a name="Reference/Functions/@halt"></a>
+    <h2 class="doc_name">@halt()</h2>
+    <strong class="warning">This function does not take any parameters.</strong>
+    <p>Pervents execution for ever.</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif")<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    bob: "Hello"<br/>
+    alice: "Hi. Can you please wait for ever?"<br/>
+    bob: "Ok!"<br/>
+    @halt()<br/>
+    alice: "Thanks!" Rem is never going to be be executed.<br/>
+    die<br/>
+    /ACT
+    </div>
+    <a name="Reference/Functions/@choice"></a>
+    <h2 class="doc_name">@choice(<em>Associative link</em>, <em>Associative link</em>, ...)</h2>
+    <strong class="warning">This function can take an infinite amount of parameters.</strong>
+    <p>Prompts choice. You can have as many options as you wish.<br/>
+    Associative link syntax: "<em>Option</em>"=>"<em>Code</em>".</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif")<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    bob: "Hello"<br/>
+    alice: "Hi. Can you please wait for a few seconds?"<br/>
+    @choice("Yes"=>"@goto YES", "No"=>"@goto NO")<br/>
+    die Rem is never going to be be executed.<br/>
+    /ACT<br/>
+    ACT YES<br/>
+    bob: "ok"<br/>
+    alice: "thanks"<br/>
+    die<br/>
+    /ACT<br/>
+    ACT NO<br/>
+    bob: "no"<br/>
+    alice: "Why?"<br/>
+    die<br/>
+    /ACT
+    </div>
+    <a name="Reference/Functions/@noop"></a>
+    <h2 class="doc_name">@noop()</h2>
+    <strong class="warning">This function does not take any parameters.</strong>
+    <p>Does nothing. Literally. That's it.</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif")<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    bob: "Hello"<br/>
+    alice: "Hi."<br/>
+    @noop() Rem does nothing<br/>
+    die<br/>
+    /ACT<br/>
+    </div>
+    <a name="Reference/Functions/@appear"></a>
+    <h2 class="doc_name">@appear(<em>Character</em>, <em>position</em>=<strong>0</strong>, <em>sprite</em>=<strong>index</strong>)</h2>
+    <strong class="warning">Parameters <em>position</em>, <em>sprite</em> are not yet implemented.</strong>
+    <p>Adding character to the scene. If no position is given, adds character to the right side of scene. If no sprite is given, the default is index.&lt;extension&gt;</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif")<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    bob: "Hello"<br/>
+    alice: "Hi."<br/>
+    bob: "Where are you?"<br/>
+    alice: "Right here!"<br/>
+    @appear(alice) Rem appears!<br/>
+    die<br/>
+    /ACT<br/>
+    </div>
+    <a name="Reference/Functions/@hide"></a>
+    <h2 class="doc_name">@hide(<em>Character</em>)</h2>
+    <p>Hides a character from scene (but does not not deletes! For deletion, see <a href="#Reference/Functions/@dispose">@dispose()</a>).</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif")<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    bob: "Hello"<br/>
+    alice: "Hi."<br/>
+    bob: "Where are you?"<br/>
+    alice: "Right here!"<br/>
+    @appear(alice) Rem appears!<br/>
+    bob: "..."<br/>
+    @hide(alice)<br/>
+    bob: "Where have you gone again?"<br/>
+    die<br/>
+    /ACT<br/>
+    </div>
+    <a name="Reference/Functions/@show"></a>
+    <h2 class="doc_name">@show(<em>Character</em>)</h2>
+    <p>Shows hideen character on scene.</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif")<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    bob: "Hello"<br/>
+    alice: "Hi."<br/>
+    bob: "Where are you?"<br/>
+    alice: "Right here!"<br/>
+    @appear(alice) Rem appears!<br/>
+    bob: "..."<br/>
+    @hide(alice)<br/>
+    bob: "Where have you gone again?"<br/>
+    @show(alice)<br/>
+    alice: "Here I am!!"<br/>
+    die<br/>
+    /ACT<br/>
+    </div>
+    <a name="Reference/Functions/@mov"></a>
+    <h2 class="doc_name">@mov(<em>Character</em>, <em>Position</em>)</h2>
+    <p>Moves a character on scene to the left on <em>Position</em>px.</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif")<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    bob: "Hello"<br/>
+    alice: "Hi."<br/>
+    bob: "Where are you?"<br/>
+    alice: "Right here!"<br/>
+    @appear(alice) Rem appears!<br/>
+    bob: "..."<br/>
+    @hide(alice)<br/>
+    bob: "Where have you gone again?"<br/>
+    @show(alice)<br/>
+    alice: "Here I am!!"<br/>
+    bob: "Okay. Can you please move a little bit right side?"<br/>
+    alice: "Okay"<br/>
+    @mov(alice, 100)<br/>
+    die<br/>
+    /ACT<br/>
+    </div>
+    <a name="Reference/Functions/@sprite"></a>
+    <h2 class="doc_name">@sprite(<em>Character</em>, <em>Sprite</em>)</h2>
+    <p>Changes character sprite to <em>Sprite</em>.</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif")<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    bob: "Hello"<br/>
+    alice: "Hi."<br/>
+    bob: "Where are you?"<br/>
+    alice: "Right here!"<br/>
+    @appear(alice) Rem appears!<br/>
+    bob: "..."<br/>
+    @hide(alice)<br/>
+    bob: "Where have you gone again?"<br/>
+    @show(alice)<br/>
+    alice: "Here I am!!"<br/>
+    bob: "Okay. Can you please move a little bit right side?"<br/>
+    alice: "Okay"<br/>
+    @mov(alice, 100)<br/>
+    @sprite(alice, "smile") Rem sprites/Alice/smile.gif
+    alice: "Is that okay?)"<br/>
+    die<br/>
+    /ACT<br/>
+    </div>
+    <a name="Reference/Functions/@dispose"></a>
+    <h2 class="doc_name">@dispose(<em>Character</em>)</h2>
+    <p>Deletes a character from scene. After disposing, you can't use @hide, @show, @mov on this character until @appear is called.</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif")<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    bob: "Hello"<br/>
+    alice: "Hi."<br/>
+    bob: "Where are you?"<br/>
+    alice: "Right here!"<br/>
+    @appear(alice) Rem appears!<br/>
+    bob: "..."<br/>
+    @hide(alice)<br/>
+    bob: "Where have you gone again?"<br/>
+    @show(alice)<br/>
+    alice: "Here I am!!"<br/>
+    bob: "Okay. Can you please move a little bit right side?"<br/>
+    alice: "Okay"<br/>
+    @mov(alice, 100)<br/>
+    bob: "Thanks. You can go now"<br/>
+    @hide(alice)<br/>
+    @dispose(alice)<br/>
+    die<br/>
+    /ACT<br/>
+    </div>
+    <a name="Reference/Functions/@background"></a>
+    <h2 class="doc_name">@background(<em>Path</em>)</h2>
+    <p>Changes background image to image located at <em>Path</em>.</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif")<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    @background("images/empty_classroom.png")<br/>
+    bob: "Hello"<br/>
+    alice: "Hi."<br/>
+    bob: "Where are you?"<br/>
+    alice: "Right here!"<br/>
+    @appear(alice) Rem appears!<br/>
+    bob: "..."<br/>
+    @hide(alice)<br/>
+    bob: "Where have you gone again?"<br/>
+    @show(alice)<br/>
+    alice: "Here I am!!"<br/>
+    bob: "Okay. Can you please move a little bit right side?"<br/>
+    alice: "Okay"<br/>
+    @mov(alice, 100)<br/>
+    die<br/>
+    /ACT<br/>
+    </div>
+    <a name="Reference/Functions/@video"></a>
+    <h2 class="doc_name">@video(<em>Path</em>)</h2>
+    <p>Plays video in the background. Video must be located at <em>Path</em>. It is recommended to use @pause after starting video.</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif")<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    @background("images/empty_classroom.png")<br/>
+    bob: "Hello"<br/>
+    alice: "Hi."<br/>
+    bob: "Where are you?"<br/>
+    alice: "Right here!"<br/>
+    @appear(alice) Rem appears!<br/>
+    bob: "..."<br/>
+    @hide(alice)<br/>
+    bob: "Where have you gone again?"<br/>
+    @show(alice)<br/>
+    alice: "Here I am!!"<br/>
+    bob: "Okay. Can you please move a little bit right side?"<br/>
+    alice: "Okay"<br/>
+    @mov(alice, 100)<br/>
+    @video("images/videos/Alice.ogv")<br/>
+    @pause(120000)<br/>
+    die<br/>
+    /ACT<br/>
+    </div>
+    <a name="Reference/Functions/@audio"></a>
+    <h2 class="doc_name">@audio(<em>Path</em>)</h2>
+    <p>Plays audio located at <em>Path</em>.</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif")<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    @audio("images/audio/calm.ogg")<br/>
+    @background("images/empty_classroom.png")<br/>
+    bob: "Hello"<br/>
+    alice: "Hi."<br/>
+    bob: "Where are you?"<br/>
+    alice: "Right here!"<br/>
+    @appear(alice) Rem appears!<br/>
+    bob: "..."<br/>
+    @hide(alice)<br/>
+    bob: "Where have you gone again?"<br/>
+    @show(alice)<br/>
+    alice: "Here I am!!"<br/>
+    bob: "Okay. Can you please move a little bit right side?"<br/>
+    alice: "Okay"<br/>
+    @mov(alice, 100)<br/>
+    @video("images/videos/Alice.ogv")<br/>
+    @pause(120000)<br/>
+    die<br/>
+    /ACT<br/>
+    </div>
+    <a name="Reference/Functions/@goto"></a>
+    <h2 class="doc_name">@goto(<em>Act</em>)</h2>
+    <p>Passes to <em>ACT</em>.</p>
+    <div class="code">
+    ACT INIT<br/>
+    $bob=Character("Bob", "green", "sprites/Alice", "gif")<br/>
+    $alice=Character("Alice", "yellow", "sprites/Alice", "gif")<br/>
+    @audio("images/audio/calm.ogg")<br/>
+    @background("images/empty_classroom.png")<br/>
+    bob: "Hello"<br/>
+    alice: "Hi."<br/>
+    bob: "Where are you?"<br/>
+    alice: "Right here!"<br/>
+    @appear(alice) Rem appears!<br/>
+    bob: "..."<br/>
+    @hide(alice)<br/>
+    bob: "Where have you gone again?"<br/>
+    @show(alice)<br/>
+    alice: "Here I am!!"<br/>
+    bob: "Okay. Can you please move a little bit right side?"<br/>
+    alice: "Okay"<br/>
+    @mov(alice, 100)<br/>
+    @video("images/videos/Alice.ogv")<br/>
+    @pause(120000)<br/>
+    @goto("BYE")<br/>
+    die Rem never going to be executed<br/>
+    /ACT<br/>
+    ACT BYE<br/>
+    bob: "Thanks. You can go now"<br/>
+    @hide(alice)<br/>
+    @dispose(alice)<br/>
+    @background("images/street.png")<br/>
+    die<br/>
+    /ACT
+    </div>
     </article>
     <hr/>
-    <em>This page is under construction…</em>
+    <em>This page is under construction…</em><br/><br/>
     <div id=By><p><img src="moemoesoft.bmp" alt="MoeMoeSoft" /><br/>By MoeMoeSoft</p></div>
     <div id=Pink></div>
 </body>
