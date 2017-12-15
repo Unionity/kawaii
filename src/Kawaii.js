@@ -207,6 +207,14 @@ function kawaiiReadActsFromString(string) {
   return acts;
 }
 
+function kawaiiReportError(name, message) {
+  document.querySelector(".kawaii_background").style["background-color"]="darkgoldenrod";
+  document.querySelector(".kawaii_background").style["color"]="red";
+  document.querySelector(".kawaii_background").style["z-index"]="9007199254740991";
+  document.querySelector(".kawaii_background").innerHTML="<h1 style='min-height: 28px; height: 28px;'>An error occured!</h1><hr style='min-height: 1px; height: 1px;'/><details style='min-height: 28px; height: 28px; color: black; font-family: monospace;'><summary style='min-height: 28px; height: 28px;'>Show details</summary><xhr style='margin: 10px; width: 80%; min-height: 28px; height: 28px;'>"+name+" (Details: "+message+").<br/>At Script."+window.Kawaii.current.Act+" at line "+window.Kawaii.current.Position+"</xhr></details>";
+  return true;
+}
+
 function kawaiiReadVariableFromString(variable, definition, script) {
   variable = variable.replace(/\$/gmiu, '');
   if (typeof definition == "undefined") {
@@ -345,7 +353,12 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
     function readNext() {
       if (window.Kawaii.current.Next) {
         kawaiiChangeLockState();
-        evaluate(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]);
+        try {
+          evaluate(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]);
+        } catch(Exception) {
+          console.error("Error interpreting script! "+Exception.message+" at Act "+window.Kawaii.current.Act+" line "+window.Kawaii.current.Position+".");
+          kawaiiReportError(Exception.name, Exception.message);
+        }
         window.Kawaii.current.Position++;
       }
     }
@@ -359,9 +372,14 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
       'mozSystemGroup': true
     }, true, true);
     document.querySelector(".kawaii_menu").addEventListener('click', function(event) {
-      document.querySelector(".kawaii_menu").style.display = "none";
+    document.querySelector(".kawaii_menu").style.display = "none";
+    try {
       evaluate(kawaiiReadStatement(atob(event.target.dataset.code)));
-      readNext();
+    } catch(Exception) {
+      console.error("Error interpreting script! "+Exception.message+" at Act "+window.Kawaii.current.Act+" line "+window.Kawaii.current.Position+".");
+      kawaiiReportError(Exception.name, Exception.message);
+    }
+    readNext();
     }, {
       'capture': true,
       'once': false,
