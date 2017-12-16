@@ -5,6 +5,7 @@ let storyScript;
  */
  const kawaiiMeta = {
   version: "0.0.0.1alpha",
+  versionCode: 1,
   parserVersion: "same",
   release: false
 };
@@ -100,8 +101,23 @@ var KawaiiKeywords = {
   die: function() {
     document.querySelector(".kawaii_container").outerHTML="";
   },
-  save: function(save) {
-    //TODO save
+  load: function() {
+    if(typeof localStorage[window.Kawaii.UID+"$save"]=="undefined") {
+      throw new LoadSaveException("Impossible to read save with no save present!");
+    } else {
+      let save=atob(localStorage[window.Kawaii.UID+"$save"]).replace(/|||$/gmiu, '').split("|||");
+      if(save[0].split("~")[0]=="kwi"&&save[0].split("~")[1]=="CC8C48"&&save[0].split("~")[2]=="D87565"&&save[0].split("~")[3]=="1") {
+        window.Kawaii.current.Act=save[1].split("$")[0];
+        window.Kawaii.current.Position=save[1].split("$")[1];
+        storyScript.variables=JSON.parse(save[2]);
+      } else {
+        throw new LoadSaveException("Impossible to read save! Save is corrupted or is not compatible with this Kawaii version.");
+      }
+    }
+  },
+  save: function() {
+    let savefile=btoa("kwi~CC8C48~D87565~1|||"+window.Kawaii.current.Act+"$"+window.Kawaii.current.Position+"|||"+JSON.stringify(storyScript.variables)+"|||%|||"+new Date().getTime()+"?");
+    localStorage[window.Kawaii.UID+"$save"]=savefile;
   }
 }
 
@@ -120,6 +136,11 @@ function ParseException(message) {
 function InterpretException(message) {
   this.message = message;
   this.name = "Interpreter exited with error";
+}
+
+function LoadSaveException(message) {
+  this.message = message;
+  this.name = "Fatal saving data exception";
 }
 
 window.Kawaii.addKeyword = function(name, handler) {
@@ -341,13 +362,18 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
       }
     }
     let context = new AudioContext();
-    let uid = btoa(config.UID);
     storyScript = this.story;
     window.Kawaii.current={};
     window.Kawaii.current.Next = true;
     window.Kawaii.current.Act = "INIT";
     window.Kawaii.current.Position = 0;
     window.Kawaii.current.Save = "";
+    Object.defineProperty(window.Kawaii, "UID", {
+      value: btoa(config.UID),
+      writable: false,
+      enumerable: false,
+      configurable: false
+    });
     var DEFAULT_KEY = {
       alg: "A256CTR",
       ext: true,
@@ -369,7 +395,6 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
     } else {
       console.warn("Warning! Context is not secure, so encrypted saves is disabled!");
     }
-    const SAVE_STORAGE = window.indexedDB.open("kawaiiStorage__" + uid, 1);
     if (storyScript["script"]["type"]!==0) {
       console.error("Script does not appears to be of type ActArray! Type 0 (ActArray) expected, but "+storyScript["type"]+" given!");
       return false;
@@ -387,7 +412,7 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
         window.Kawaii.current.Position++;
       }
     }
-    document.querySelector(target).outerHTML = '<div class="kawaii_container" id="kawaii__' + uid.replace(".", "_") + '" align="left" ><div class="kawaii_viewport"><div class="kawaii_menu" style="display: none;"></div><div class="kawaii_background"></div><div class="kawaii_front" align="center"></div><div class="kawaii_text"><h4 class="kawaii_name"></h4><p class="kawaii_line"></p><ins class="kawaii_next">&#x21db;</ins></div><div class="kawaii_toolbar">&nbsp;&nbsp;<strong class="kawaii_lock"><em>LOCK</em></strong></div></div>';
+    document.querySelector(target).outerHTML = '<div class="kawaii_container" id="kawaii__' + window.Kawaii.UID.replace(".", "_") + '" align="left" ><div class="kawaii_viewport"><div class="kawaii_menu" style="display: none;"></div><div class="kawaii_background"></div><div class="kawaii_front" align="center"></div><div class="kawaii_text"><h4 class="kawaii_name"></h4><p class="kawaii_line"></p><ins class="kawaii_next">&#x21db;</ins></div><div class="kawaii_toolbar">&nbsp;&nbsp;<strong class="kawaii_lock"><em>LOCK</em></strong></div></div>';
     document.querySelector(".kawaii_front").addEventListener('click', function() {
       readNext();
     }, {
