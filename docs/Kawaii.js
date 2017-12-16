@@ -19,6 +19,7 @@ const KawaiiTypes = {
   VariableDefenition: 4, //$a=Character();
   Speech: 6, //a: "b"
 }
+
 var KawaiiFunctions = {
   appear: function(parameters) {
     document.querySelector(".kawaii_front").innerHTML += "<img id='kawaii_CHARACTERSPRITE___" + parameters[0] + "' src='" + storyScript["variables"][parameters[0]]["folder"] + "/index." + storyScript["variables"][parameters[0]]["extension"] + "' />";
@@ -104,6 +105,13 @@ var KawaiiKeywords = {
   }
 }
 
+var KawaiiEventListeners = {
+  nextline: [],
+  save: [],
+  load: [],
+  exit: []
+}
+
 function ParseException(message) {
   this.message = message;
   this.name = "Fatal parser exception";
@@ -112,6 +120,18 @@ function ParseException(message) {
 function InterpretException(message) {
   this.message = message;
   this.name = "Interpreter exited with error";
+}
+
+window.Kawaii.addKeyword = function(name, handler) {
+  KawaiiKeywords[name]=handler;
+}
+
+window.Kawaii.addFunction = function(name, handler) {
+  KawaiiFunctions[name]=handler;
+}
+
+window.Kawaii.addEventListener = function(name, handler) {
+  KawaiiEventListeners[name].push(handler);
 }
 
 function kawaiiChangeLockState() {
@@ -284,7 +304,7 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
     /**
      * Line interpreter
      */
-    function evaluate(statement) {
+    window.Kawaii.evaluate = function(statement) {
       switch(statement["type"]) {
         case 2: //@Function()
         if(typeof KawaiiFunctions[statement["name"]] == "undefined") {
@@ -302,7 +322,8 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
         break;
         case 4: //variable defenition
         kawaiiReadVariableFromString(statement["name"], statement["definition"], storyScript);
-        kawaiiChangeLockState();
+        window.Kawaii.current.Position++;
+        window.Kawaii.evaluate(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]);
         break;
         case 6:
         if(storyScript["variables"][statement["character"]]["type"]=="character") {
@@ -357,7 +378,8 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
       if (window.Kawaii.current.Next) {
         kawaiiChangeLockState();
         try {
-          evaluate(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]);
+          window.Kawaii.evaluate(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]);
+          KawaiiEventListeners.nextline.forEach(function(func) { func(window.Kawaii.current.Position, window.Kawaii.current.Act, storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]); });
         } catch(Exception) {
           console.error("Error interpreting script! "+Exception.message+" at Act "+window.Kawaii.current.Act+" line "+window.Kawaii.current.Position+".");
           kawaiiReportError(Exception.name, Exception.message);
@@ -377,7 +399,7 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
     document.querySelector(".kawaii_menu").addEventListener('click', function(event) {
     document.querySelector(".kawaii_menu").style.display = "none";
     try {
-      evaluate(kawaiiReadStatement(atob(event.target.dataset.code)));
+      window.Kawaii.evaluate(kawaiiReadStatement(atob(event.target.dataset.code)));
     } catch(Exception) {
       console.error("Error interpreting script! "+Exception.message+" at Act "+window.Kawaii.current.Act+" line "+window.Kawaii.current.Position+".");
       kawaiiReportError(Exception.name, Exception.message);
