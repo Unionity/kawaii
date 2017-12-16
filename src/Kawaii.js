@@ -26,6 +26,24 @@ var KawaiiFunctions = {
     document.querySelector(".kawaii_front").innerHTML += "<img id='kawaii_CHARACTERSPRITE___" + parameters[0] + "' src='" + storyScript["variables"][parameters[0]]["folder"] + "/index." + storyScript["variables"][parameters[0]]["extension"] + "' />";
     kawaiiChangeLockState();
   },
+  audio: function(parameters) {
+    let file = kawaiiClarifyValue(parameters[0]);
+    let request = new XMLHttpRequest();
+    request.open('GET', file, true);
+    request.responseType = 'arraybuffer';
+    request.onload = function(array) {
+      window.Kawaii.current.AudioContext.decodeAudioData(this.response, function(buff) {
+        let buffer = buff;
+        let source = window.Kawaii.current.AudioContext.createBufferSource();
+        source.buffer=buffer;
+        let playback = window.Kawaii.current.AudioContext.destination;
+        source.connect(playback);
+        source.start(0);
+        kawaiiChangeLockState();
+      });
+    };
+    request.send();
+  },
   dispose: function(parameters) {
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).outerHTML = "";
     kawaiiChangeLockState();
@@ -361,9 +379,9 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
         break;
       }
     }
-    let context = new AudioContext();
     storyScript = this.story;
     window.Kawaii.current={};
+    window.Kawaii.current.AudioContext = new AudioContext();
     window.Kawaii.current.Next = true;
     window.Kawaii.current.Act = "INIT";
     window.Kawaii.current.Position = 0;
