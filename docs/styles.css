@@ -38,6 +38,23 @@ xhr {
   color: orange;
   font-weight: 700;
 }
+.editor {
+ background: #fff;
+ height: 90vh;
+ display: flex;
+ flex-direction: row;
+}
+.editor textarea#source {
+ width: 40vw;
+ height: 90%;
+ border: solid black 1px;
+ margin: 5px;
+ padding: 5px;
+ resize: none;
+}
+#editor {
+ border-right: solid black 1px;
+}
 #Latest {
   color: white;
   padding: 20pt;
@@ -58,4 +75,40 @@ xhr {
   bottom: 16px;
   right: 5pc;
   display: inline-block;
+}
+#launch {
+  background: green;
+  color: #fff;
+  border: outset grey 2px;
+}
+#launch:active {
+  border: inset grey 2px;
+}
+#getlink {
+  background: cadetblue;
+  color: #fff;
+  border: outset grey 2px;
+}
+#getlink:active {
+  border: inset grey 2px;
+}
+#rd {
+  background: #2b2b2b;
+  color: #fff;
+  border: outset grey 2px;
+}
+#rd:active {
+  border: inset grey 2px;
+}
+@media screen and (max-width: 460px) {
+  .editor {
+    height: initial;
+  }
+  .editor textarea#source {
+    width: 90vw;
+    height: 55vh;
+  }
+  .editor {
+    flex-direction: column-reverse;
+  }
 }

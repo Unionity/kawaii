@@ -3,7 +3,7 @@
   <head>
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="kawaii_base.css" />
-    <link rel="stylesheet" href="Plain/Plain.css" />
+    <link rel="stylesheet" href="Plain/Plain_editor.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Kawaii.js - visual novel engine.</title>
   </head>

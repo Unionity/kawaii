@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.2//EN" "http://www.openmobilealliance.org/tech/DTD/xhtml-mobile12.dtd">
+<html lang="en-us">
+<head>
+<title>Kawaii Visual Editor</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="kawaii_base_editor.css" />
+<link rel="stylesheet" href="Plain/Plain.css" />
+</head>
+<body style="background: darkgrey;">
+ <header style="background: lightpink; color: #fff; padding: 5px;"><h1>Kawaii.js Editor</h1><div><button id="launch">Launch!</button>&nbsp;&nbsp;<button id="getlink">Get link</button>&nbsp;&nbsp;<button id="rd">Read the docs!</button></div></header>
+ <div class="editor">
+  <div id="editor">
+   <h2 style="color: #000;">Source</h2>
+   <textarea id="source">
+ACT INIT
+die
+/ACT</textarea>
+  </div>
+  <div id="preview">
+    <h2 style="color: #000;">Preview</h2>
+    <div id="screen"><h3>Waiting...</h3></div>
+  </div>
+ </div>
+ <script src="Kawaii.js"></script>
+ <script>
+  if(location.hash.replace("#", "").replace("source=", "")!=="") {
+    document.querySelector("#source").value=atob(location.hash.replace("#", "").replace("/fiddle/", ""));
+  }
+ </script>
+ <script>
+ document.querySelector("#rd").addEventListener("click", function() {
+  window.location.href="documentation.shtml";
+ });
+ document.querySelector("#getlink").addEventListener("click", function() {
+  prompt("Copy this link to your clipboard", "http://kawaii.js.org/vedit.shtml#/fiddle/"+btoa(document.querySelector("#source").value));
+ });
+  document.querySelector("#launch").addEventListener("click", function() {
+    if(typeof window.Kawaii.current!=="undefined") {
+      window.Kawaii.current.AudioContext.close();
+      window.Kawaii.current=undefined;
+      if(document.querySelector(".kawaii_container")!==null) {
+        document.querySelector(".kawaii_container").outerHTML='<div id="screen"><h3>Waiting...</h3></div>';
+      } else {
+        document.querySelector("#preview").innerHTML+='<div id="screen"><h3>Waiting...</h3></div>';
+      }
+    }
+    let novel=new Kawaii({id:"VisualPreview"}, "#screen", document.querySelector("#source").value);
+    novel.start();
+  });
+ </script>
+</body>
+</html>
