@@ -46,7 +46,7 @@ xhr {
 }
 .editor textarea#source {
  width: 40vw;
- height: 90%;
+ height: 100%;
  border: solid black 1px;
  margin: 5px;
  padding: 5px;
@@ -98,6 +98,14 @@ xhr {
   border: outset grey 2px;
 }
 #rd:active {
+  border: inset grey 2px;
+}
+#paste {
+  background: #4a412a;
+  color: #fff;
+  border: outset grey 2px;
+}
+#paste:active {
   border: inset grey 2px;
 }
 @media screen and (max-width: 460px) {

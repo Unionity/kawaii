@@ -7,14 +7,19 @@
 <link rel="stylesheet" href="Plain/Plain.css" />
 </head>
 <body style="background: darkgrey;">
- <header style="background: lightpink; color: #fff; padding: 5px;"><h1>Kawaii.js Editor</h1><div><button id="launch">Launch!</button>&nbsp;&nbsp;<button id="getlink">Get link</button>&nbsp;&nbsp;<button id="rd">Read the docs!</button></div></header>
+ <header style="background: lightpink; color: #fff; padding: 5px;"><h1>Kawaii.js Editor</h1><div><button id="launch">Launch!</button>&nbsp;&nbsp;<button id="getlink">Get link</button>&nbsp;&nbsp;<button id="paste">Pastebin</button>&nbsp;&nbsp;<button id="rd">Read the docs!</button></div></header>
  <div class="editor">
   <div id="editor">
    <h2 style="color: #000;">Source</h2>
-   <textarea id="source">
+   <form style="height: 90%;" id="pastebin" action="https://pastebin.ca/quiet-paste.php?api=w/2whFAo4SnPMCILlsMB68tJP9QPmhiY" method="POST">
+     <input type="hidden" name="name" value="~KawaiiEditorFile.ka" />
+     <input type="hidden" name="type" value="1" />
+     <input type="hidden" name="description" value="Made in Kawaii Editor" />
+     <textarea id="source" name="content">
 ACT INIT
 die
 /ACT</textarea>
+  </form>
   </div>
   <div id="preview">
     <h2 style="color: #000;">Preview</h2>
@@ -28,6 +33,9 @@ die
   }
  </script>
  <script>
+ document.querySelector("#paste").addEventListener("click", function() {
+  document.querySelector("#pastebin").submit();
+ });
  document.querySelector("#rd").addEventListener("click", function() {
   window.location.href="documentation.shtml";
  });
