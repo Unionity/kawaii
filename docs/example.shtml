@@ -3,7 +3,7 @@
   <head>
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="kawaii_base.css" />
-    <link rel="stylesheet" href="Plain/Plain_editor.css" />
+    <link rel="stylesheet" href="Plain/Plain.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Kawaii.js - visual novel engine.</title>
   </head>
@@ -42,7 +42,7 @@ die
     </script>
     <script src="Kawaii.js"></script>
     <script>
-      let novel=new Kawaii({id:'example'}, ".Kawaii", document.querySelector("#Script").innerHTML);
+      let novel=new Kawaii({id:'example', audio:'tag'}, ".Kawaii", document.querySelector("#Script").innerHTML);
       novel.start();
     </script>
   </body>

@@ -27,22 +27,29 @@ var KawaiiFunctions = {
     kawaiiChangeLockState();
   },
   audio: function(parameters) {
-    let file = kawaiiClarifyValue(parameters[0]);
-    let request = new XMLHttpRequest();
-    request.open('GET', file, true);
-    request.responseType = 'arraybuffer';
-    request.onload = function(array) {
-      window.Kawaii.current.AudioContext.decodeAudioData(this.response, function(buff) {
-        let buffer = buff;
-        let source = window.Kawaii.current.AudioContext.createBufferSource();
-        source.buffer=buffer;
-        let playback = window.Kawaii.current.AudioContext.destination;
-        source.connect(playback);
-        source.start(0);
-        kawaiiChangeLockState();
-      });
-    };
-    request.send();
+    if(window.Kawaii.current.Configuration.audio=="audiocontext") {
+      let file = kawaiiClarifyValue(parameters[0]);
+      let request = new XMLHttpRequest();
+      request.open('GET', file, true);
+      request.responseType = 'arraybuffer';
+      request.onload = function(array) {
+        window.Kawaii.current.AudioContext.decodeAudioData(this.response, function(buff) {
+          let buffer = buff;
+          let source = window.Kawaii.current.AudioContext.createBufferSource();
+          source.buffer=buffer;
+          let playback = window.Kawaii.current.AudioContext.destination;
+          source.connect(playback);
+          source.start(0);
+          kawaiiChangeLockState();
+        });
+      };
+      request.send();
+    } else {
+      document.querySelector("#kawaiiaout").pause();
+      document.querySelector("#kawaiiaout").src=kawaiiClarifyValue(parameters[0]);
+      document.querySelector("#kawaiiaout").play();
+      kawaiiChangeLockState();
+    }
   },
   dispose: function(parameters) {
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).outerHTML = "";
@@ -392,6 +399,12 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
     window.Kawaii.current.Act = "INIT";
     window.Kawaii.current.Position = 0;
     window.Kawaii.current.Save = "";
+    Object.defineProperty(window.Kawaii.current, "Configuration", {
+      value: config,
+      writable: false,
+      enumerable: true,
+      configurable: false
+    });
     Object.defineProperty(window.Kawaii, "UID", {
       value: btoa(config.UID),
       writable: false,
@@ -430,14 +443,13 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
           window.Kawaii.evaluate(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]);
           KawaiiEventListeners.nextline.forEach(function(func) { func(window.Kawaii.current.Position, window.Kawaii.current.Act, storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]); });
         } catch(Exception) {
-          console.log(Exception.stack);
           console.error("Error interpreting script! "+Exception.message+" at Act "+window.Kawaii.current.Act+" line "+window.Kawaii.current.Position+".");
           kawaiiReportError(Exception.name, Exception.message);
         }
         window.Kawaii.current.Position++;
       }
     }
-    document.querySelector(target).outerHTML = '<div class="kawaii_container" id="kawaii__' + window.Kawaii.UID.replace(".", "_") + '" align="left" ><div class="kawaii_viewport"><div class="kawaii_menu" style="display: none;"></div><div class="kawaii_background"></div><div class="kawaii_front" align="center"></div><div class="kawaii_text"><h4 class="kawaii_name"></h4><p class="kawaii_line"></p><ins class="kawaii_next">&#x21db;</ins></div><div class="kawaii_toolbar">&nbsp;&nbsp;<strong class="kawaii_lock"><em>LOCK</em></strong></div></div>';
+    document.querySelector(target).outerHTML = '<div class="kawaii_container" id="kawaii__' + window.Kawaii.UID.replace(".", "_") + '" align="left" ><audio id="kawaiiaout" src="" autoplay loop></audio><div class="kawaii_viewport"><div class="kawaii_menu" style="display: none;"></div><div class="kawaii_background"></div><div class="kawaii_front" align="center"></div><div class="kawaii_text"><h4 class="kawaii_name"></h4><p class="kawaii_line"></p><ins class="kawaii_next">&#x21db;</ins></div><div class="kawaii_toolbar">&nbsp;&nbsp;<strong class="kawaii_lock"><em>LOCK</em></strong></div></div>';
     document.querySelector(".kawaii_front").addEventListener('click', function() {
       readNext();
     }, {
