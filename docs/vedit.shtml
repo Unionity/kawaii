@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.2//EN" "http://www.openmobilealliance.org/tech/DTD/xhtml-mobile12.dtd">
 <html lang="en-us">
 <head>
-<title>Kawaii Visual Editor</title>
+<title>Kawaii Editor</title>
 <link rel="stylesheet" href="styles.css" />
 <link rel="stylesheet" href="kawaii_base_editor.css" />
 <link rel="stylesheet" href="Plain/Plain.css" />
