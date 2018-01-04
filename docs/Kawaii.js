@@ -194,20 +194,24 @@ function kawaiiChangeLockState() {
 }
 
 function kawaiiClarifyValue(value) {
-  if(value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu) !== null&&!/^new/gmiu.test(value)&&!/^"(.*)"$/gmiu.test(value)&&!/^'(.*)'$/gmiu.test(value)) {
-    let parameters=value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu)[0].match(/\(([\s\S]*)\)/giu)[0].replace(/\(|\)| /gmiu, "").split(",");
-    let name=value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu)[0].replace(/\(([\s\S]*)\)/giu, "");
-    return KawaiiFunctions[name](parameters); //return function value
-  } else if (value.match(/"(.*)"/gmiu) !== null) {
-    return value.match(/"(.*)"/gmiu)[0].replace(/"/gmiu, '');
-  } else if (value.match(/'(.*)'/gmiu) !== null) {
-    return value.match(/'(.*)'/gmiu)[0].replace(/'/gmiu, '');
-  } else {
-    if (storyScript["variables"][value.replace(/ /gmiu, "")]["type"] == "variable") {
-      return storyScript["variables"][value.replace(/ /gmiu, "")]["value"];
+  if(typeof value == "string") {
+    if(value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu) !== null&&!/^new/gmiu.test(value)&&!/^"(.*)"$/gmiu.test(value)&&!/^'(.*)'$/gmiu.test(value)) {
+      let parameters=value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu)[0].match(/\(([\s\S]*)\)/giu)[0].replace(/\(|\)| /gmiu, "").split(",");
+      let name=value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu)[0].replace(/\(([\s\S]*)\)/giu, "");
+      return KawaiiFunctions[name](parameters); //return function value
+    } else if (value.match(/"(.*)"/gmiu) !== null) {
+      return value.match(/"(.*)"/gmiu)[0].replace(/"/gmiu, '');
+    } else if (value.match(/'(.*)'/gmiu) !== null) {
+      return value.match(/'(.*)'/gmiu)[0].replace(/'/gmiu, '');
     } else {
-      throw new ParseException("Error parsing input! Expected variable of type Variable, but variable of type " + storyScript["variables"][value.replace(' ', '')]["type"] + " given!");
+      if (storyScript["variables"][value.replace(/ /gmiu, "")]["type"] == "variable") {
+        return storyScript["variables"][value.replace(/ /gmiu, "")]["value"];
+      } else {
+        throw new ParseException("Error parsing input! Expected variable of type Variable, but variable of type " + storyScript["variables"][value.replace(' ', '')]["type"] + " given!");
+      }
     }
+  } else {
+    return value;
   }
 }
 /**
@@ -215,7 +219,11 @@ function kawaiiClarifyValue(value) {
  */
 function kawaiiTypewriter(txt, target, delay = 25) {
   let i = 0;
-
+  if(typeof txt!=="string"&&txt!==undefined&&txt!==null) {
+    txt=txt.toLocaleString();
+  } else if(txt===undefined||txt===null) {
+    txt="NULL";
+  }
   function write() {
     document.querySelector(target).innerHTML = txt.substring(0, i);
     i++;
@@ -295,8 +303,13 @@ function kawaiiReadVariableFromString(variable, definition, script) {
   if (typeof definition == "undefined") {
     throw new ParseException("Invalid variable defenition!");
   }
-  var variableType = definition.match(/.+?(?=\()/gmiu)[0].replace("new ", "");
-  var variableParameters = definition.match(/(\((.*)\))/gmiu)[0].replace(/\(||\)/gmiu, '').split(",");
+  let variableType = definition.match(/.+?(?=\()/gmiu);
+  if(variableType !== null) {
+    variableType=variableType[0].replace("new ", "");
+    var variableParameters = definition.match(/(\((.*)\))/gmiu)[0].replace(/\(||\)/gmiu, '').split(",");
+  } else {
+    var variableValue = definition;
+  }
   switch (variableType) {
     case "Character":
     if (variableParameters.length == 4) {
@@ -324,7 +337,7 @@ function kawaiiReadVariableFromString(variable, definition, script) {
     };
     break;
     default:
-    script["variables"][variable] = kawaiiClarifyValue(variableType);
+    script["variables"][variable] = {value: kawaiiClarifyValue(variableValue), type: "variable"};
     break;
   }
   return true;
@@ -332,7 +345,7 @@ function kawaiiReadVariableFromString(variable, definition, script) {
 
 function kawaiiReadScriptFromString(script) {
   return {
-    variables: {},
+    variables: {"true": {type:"variable", value: true}, "false": {type:"variable", value: false}, "null": {type:"variable", value: undefined}, "___ENGINE_VERSION___": {type:"variable", value: kawaiiMeta.version}},
     script: kawaiiReadActsFromString(script)
   };
 }
@@ -444,7 +457,7 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
           KawaiiEventListeners.nextline.forEach(function(func) { func(window.Kawaii.current.Position, window.Kawaii.current.Act, storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]); });
         } catch(Exception) {
           console.error("Error interpreting script! "+Exception.message+" at Act "+window.Kawaii.current.Act+" line "+window.Kawaii.current.Position+".");
-          kawaiiReportError(Exception.name, Exception.message);
+          kawaiiReportError(Exception.name, Exception.message+" "+Exception.stack);
         }
         window.Kawaii.current.Position++;
       }

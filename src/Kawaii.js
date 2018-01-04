@@ -27,22 +27,29 @@ var KawaiiFunctions = {
     kawaiiChangeLockState();
   },
   audio: function(parameters) {
-    let file = kawaiiClarifyValue(parameters[0]);
-    let request = new XMLHttpRequest();
-    request.open('GET', file, true);
-    request.responseType = 'arraybuffer';
-    request.onload = function(array) {
-      window.Kawaii.current.AudioContext.decodeAudioData(this.response, function(buff) {
-        let buffer = buff;
-        let source = window.Kawaii.current.AudioContext.createBufferSource();
-        source.buffer=buffer;
-        let playback = window.Kawaii.current.AudioContext.destination;
-        source.connect(playback);
-        source.start(0);
-        kawaiiChangeLockState();
-      });
-    };
-    request.send();
+    if(window.Kawaii.current.Configuration.audio=="audiocontext") {
+      let file = kawaiiClarifyValue(parameters[0]);
+      let request = new XMLHttpRequest();
+      request.open('GET', file, true);
+      request.responseType = 'arraybuffer';
+      request.onload = function(array) {
+        window.Kawaii.current.AudioContext.decodeAudioData(this.response, function(buff) {
+          let buffer = buff;
+          let source = window.Kawaii.current.AudioContext.createBufferSource();
+          source.buffer=buffer;
+          let playback = window.Kawaii.current.AudioContext.destination;
+          source.connect(playback);
+          source.start(0);
+          kawaiiChangeLockState();
+        });
+      };
+      request.send();
+    } else {
+      document.querySelector("#kawaiiaout").pause();
+      document.querySelector("#kawaiiaout").src=kawaiiClarifyValue(parameters[0]);
+      document.querySelector("#kawaiiaout").play();
+      kawaiiChangeLockState();
+    }
   },
   dispose: function(parameters) {
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).outerHTML = "";
@@ -187,20 +194,24 @@ function kawaiiChangeLockState() {
 }
 
 function kawaiiClarifyValue(value) {
-  if(value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu) !== null&&!/^new/gmiu.test(value)&&!/^"(.*)"$/gmiu.test(value)&&!/^'(.*)'$/gmiu.test(value)) {
-    let parameters=value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu)[0].match(/\(([\s\S]*)\)/giu)[0].replace(/\(|\)| /gmiu, "").split(",");
-    let name=value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu)[0].replace(/\(([\s\S]*)\)/giu, "");
-    return KawaiiFunctions[name](parameters); //return function value
-  } else if (value.match(/"(.*)"/gmiu) !== null) {
-    return value.match(/"(.*)"/gmiu)[0].replace(/"/gmiu, '');
-  } else if (value.match(/'(.*)'/gmiu) !== null) {
-    return value.match(/'(.*)'/gmiu)[0].replace(/'/gmiu, '');
-  } else {
-    if (storyScript["variables"][value.replace(/ /gmiu, "")]["type"] == "variable") {
-      return storyScript["variables"][value.replace(/ /gmiu, "")]["value"];
+  if(typeof value == "string") {
+    if(value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu) !== null&&!/^new/gmiu.test(value)&&!/^"(.*)"$/gmiu.test(value)&&!/^'(.*)'$/gmiu.test(value)) {
+      let parameters=value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu)[0].match(/\(([\s\S]*)\)/giu)[0].replace(/\(|\)| /gmiu, "").split(",");
+      let name=value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu)[0].replace(/\(([\s\S]*)\)/giu, "");
+      return KawaiiFunctions[name](parameters); //return function value
+    } else if (value.match(/"(.*)"/gmiu) !== null) {
+      return value.match(/"(.*)"/gmiu)[0].replace(/"/gmiu, '');
+    } else if (value.match(/'(.*)'/gmiu) !== null) {
+      return value.match(/'(.*)'/gmiu)[0].replace(/'/gmiu, '');
     } else {
-      throw new ParseException("Error parsing input! Expected variable of type Variable, but variable of type " + storyScript["variables"][value.replace(' ', '')]["type"] + " given!");
+      if (storyScript["variables"][value.replace(/ /gmiu, "")]["type"] == "variable") {
+        return storyScript["variables"][value.replace(/ /gmiu, "")]["value"];
+      } else {
+        throw new ParseException("Error parsing input! Expected variable of type Variable, but variable of type " + storyScript["variables"][value.replace(' ', '')]["type"] + " given!");
+      }
     }
+  } else {
+    return value;
   }
 }
 /**
@@ -208,7 +219,11 @@ function kawaiiClarifyValue(value) {
  */
 function kawaiiTypewriter(txt, target, delay = 25) {
   let i = 0;
-
+  if(typeof txt!=="string"&&txt!==undefined&&txt!==null) {
+    txt=txt.toLocaleString();
+  } else if(txt===undefined||txt===null) {
+    txt="NULL";
+  }
   function write() {
     document.querySelector(target).innerHTML = txt.substring(0, i);
     i++;
@@ -288,8 +303,13 @@ function kawaiiReadVariableFromString(variable, definition, script) {
   if (typeof definition == "undefined") {
     throw new ParseException("Invalid variable defenition!");
   }
-  var variableType = definition.match(/.+?(?=\()/gmiu)[0].replace("new ", "");
-  var variableParameters = definition.match(/(\((.*)\))/gmiu)[0].replace(/\(||\)/gmiu, '').split(",");
+  let variableType = definition.match(/.+?(?=\()/gmiu);
+  if(variableType !== null) {
+    variableType=variableType[0].replace("new ", "");
+    var variableParameters = definition.match(/(\((.*)\))/gmiu)[0].replace(/\(||\)/gmiu, '').split(",");
+  } else {
+    var variableValue = definition;
+  }
   switch (variableType) {
     case "Character":
     if (variableParameters.length == 4) {
@@ -317,7 +337,7 @@ function kawaiiReadVariableFromString(variable, definition, script) {
     };
     break;
     default:
-    script["variables"][variable] = kawaiiClarifyValue(variableType);
+    script["variables"][variable] = {value: kawaiiClarifyValue(variableValue), type: "variable"};
     break;
   }
   return true;
@@ -325,7 +345,7 @@ function kawaiiReadVariableFromString(variable, definition, script) {
 
 function kawaiiReadScriptFromString(script) {
   return {
-    variables: {},
+    variables: {"true": {type:"variable", value: true}, "false": {type:"variable", value: false}, "null": {type:"variable", value: undefined}, "___ENGINE_VERSION___": {type:"variable", value: kawaiiMeta.version}},
     script: kawaiiReadActsFromString(script)
   };
 }
@@ -392,6 +412,12 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
     window.Kawaii.current.Act = "INIT";
     window.Kawaii.current.Position = 0;
     window.Kawaii.current.Save = "";
+    Object.defineProperty(window.Kawaii.current, "Configuration", {
+      value: config,
+      writable: false,
+      enumerable: true,
+      configurable: false
+    });
     Object.defineProperty(window.Kawaii, "UID", {
       value: btoa(config.UID),
       writable: false,
@@ -430,14 +456,13 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
           window.Kawaii.evaluate(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]);
           KawaiiEventListeners.nextline.forEach(function(func) { func(window.Kawaii.current.Position, window.Kawaii.current.Act, storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]); });
         } catch(Exception) {
-          console.log(Exception.stack);
           console.error("Error interpreting script! "+Exception.message+" at Act "+window.Kawaii.current.Act+" line "+window.Kawaii.current.Position+".");
-          kawaiiReportError(Exception.name, Exception.message);
+          kawaiiReportError(Exception.name, Exception.message+" "+Exception.stack);
         }
         window.Kawaii.current.Position++;
       }
     }
-    document.querySelector(target).outerHTML = '<div class="kawaii_container" id="kawaii__' + window.Kawaii.UID.replace(".", "_") + '" align="left" ><div class="kawaii_viewport"><div class="kawaii_menu" style="display: none;"></div><div class="kawaii_background"></div><div class="kawaii_front" align="center"></div><div class="kawaii_text"><h4 class="kawaii_name"></h4><p class="kawaii_line"></p><ins class="kawaii_next">&#x21db;</ins></div><div class="kawaii_toolbar">&nbsp;&nbsp;<strong class="kawaii_lock"><em>LOCK</em></strong></div></div>';
+    document.querySelector(target).outerHTML = '<div class="kawaii_container" id="kawaii__' + window.Kawaii.UID.replace(".", "_") + '" align="left" ><audio id="kawaiiaout" src="" autoplay loop></audio><div class="kawaii_viewport"><div class="kawaii_menu" style="display: none;"></div><div class="kawaii_background"></div><div class="kawaii_front" align="center"></div><div class="kawaii_text"><h4 class="kawaii_name"></h4><p class="kawaii_line"></p><ins class="kawaii_next">&#x21db;</ins></div><div class="kawaii_toolbar">&nbsp;&nbsp;<strong class="kawaii_lock"><em>LOCK</em></strong></div></div>';
     document.querySelector(".kawaii_front").addEventListener('click', function() {
       readNext();
     }, {
