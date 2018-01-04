@@ -9,6 +9,38 @@ let storyScript;
   parserVersion: "same",
   release: false
 };
+
+function kawaiiChangeLockState() {
+  if(window.Kawaii.current.Next) {
+    window.Kawaii.current.Next = !window.Kawaii.current.Next;
+    document.querySelector(".kawaii_next").style.opacity="0.000";
+  } else {
+    window.Kawaii.current.Next = !window.Kawaii.current.Next;
+    document.querySelector(".kawaii_next").style.opacity="1.000";
+  }
+}
+
+function kawaiiClarifyValue(value) {
+  if(typeof value == "string") {
+    if(value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu) !== null&&!/^new/gmiu.test(value)&&!/^"(.*)"$/gmiu.test(value)&&!/^'(.*)'$/gmiu.test(value)) {
+      let parameters=value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu)[0].match(/\(([\s\S]*)\)/giu)[0].replace(/\(|\)| /gmiu, "").split(",");
+      let name=value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu)[0].replace(/\(([\s\S]*)\)/giu, "");
+      return KawaiiFunctions[name](parameters); //return function value
+    } else if (value.match(/"(.*)"/gmiu) !== null) {
+      return value.match(/"(.*)"/gmiu)[0].replace(/"/gmiu, '');
+    } else if (value.match(/'(.*)'/gmiu) !== null) {
+      return value.match(/'(.*)'/gmiu)[0].replace(/'/gmiu, '');
+    } else {
+      if (storyScript["variables"][value.replace(/ /gmiu, "")]["type"] === "variable") {
+        return storyScript["variables"][value.replace(/ /gmiu, "")]["value"];
+      } else {
+        throw new ParseException("Error parsing input! Expected variable of type Variable, but variable of type " + storyScript["variables"][value.replace(' ', '')]["type"] + " given!");
+      }
+    }
+  } else {
+    return value;
+  }
+}
 /**
  * Functions, types, statements...
  */
@@ -22,11 +54,11 @@ const KawaiiTypes = {
 }
 
 var KawaiiFunctions = {
-  appear: function(parameters) {
+  appear(parameters) {
     document.querySelector(".kawaii_front").innerHTML += "<img id='kawaii_CHARACTERSPRITE___" + parameters[0] + "' src='" + storyScript["variables"][parameters[0]]["folder"] + "/index." + storyScript["variables"][parameters[0]]["extension"] + "' />";
     kawaiiChangeLockState();
   },
-  audio: function(parameters) {
+  audio(parameters) {
     if(window.Kawaii.current.Configuration.audio=="audiocontext") {
       let file = kawaiiClarifyValue(parameters[0]);
       let request = new XMLHttpRequest();
@@ -51,19 +83,19 @@ var KawaiiFunctions = {
       kawaiiChangeLockState();
     }
   },
-  dispose: function(parameters) {
+  dispose(parameters) {
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).outerHTML = "";
     kawaiiChangeLockState();
   },
-  hide: function(parameters) {
+  hide(parameters) {
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).style.opacity = "0.000";
     kawaiiChangeLockState();
   },
-  show: function(parameters) {
+  show(parameters) {
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).style.opacity = "1.000";
     kawaiiChangeLockState();
   },
-  stop: function(parameters) {
+  stop(parameters) {
     parameters.forEach(function(arg) {
       switch(kawaiiClarifyValue(arg)) {
         case "audio":
@@ -93,44 +125,44 @@ var KawaiiFunctions = {
     });
     kawaiiChangeLockState();
   },
-  mov: function(parameters) {
+  mov(parameters) {
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).style.right = document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).style.right + parameters[1] + "pt";
     kawaiiChangeLockState();
   },
-  background: function(parameters) {
+  background(parameters) {
     document.querySelector(".kawaii_background").innerHTML = "<img src='" + kawaiiClarifyValue(parameters[0]) + "' alt='" + kawaiiClarifyValue(parameters[0]) + "' />";
     kawaiiChangeLockState();
   },
-  sprite: function(parameters) {
+  sprite(parameters) {
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).src = storyScript["variables"][parameters[0]].folder + "/" + kawaiiClarifyValue(parameters[1]) + "." + storyScript["variables"][parameters[0]].extension;
     kawaiiChangeLockState();
   },
-  goto: function(parameters) {
+  goto(parameters) {
     window.Kawaii.current.Act = kawaiiClarifyValue(parameters[0]);
     window.Kawaii.current.Position = 0;
     kawaiiChangeLockState();
   },
-  halt: function(parameters) {
+  halt(parameters) {
     window.Kawaii.current.Next = window.Kawaii.current.Next;
   },
-  pause: function(parameters) {
+  pause(parameters) {
     window.setTimeout(function() {
-      window.Kawaii.current.Next != window.Kawaii.current.Next;
+      window.Kawaii.current.Next =! window.Kawaii.current.Next;
     }, parameters[0]);
   },
-  noop: function(parameters) {
+  noop(parameters) {
     while (true) {
       break;
     }
     kawaiiChangeLockState();
   },
-  video: function(parameters) {
+  video(parameters) {
     document.querySelector(".kawaii_background").innerHTML = "<video autoplay nodownload><source src='" + kawaiiClarifyValue(parameters[0]) + "'></source></video>";
     kawaiiChangeLockState();
     window.Kawaii.current.Position++;
     readNext();
   },
-  lock: function(parameters) {
+  lock(parameters) {
     window.setTimeout(function() {
       kawaiiChangeLockState();
     }, parameters[0]);
@@ -139,11 +171,11 @@ var KawaiiFunctions = {
       document.querySelector(".kawaii_lock").style.display = "none";
     }, parameters[0]);
   },
-  choice: function(parameters) {
+  choice(parameters) {
     let options = [];
     let htmlOptions = "";
     parameters.forEach(function(choice) {
-      let opt = [kawaiiClarifyValue(choice.split('=>')[0]).replace(/\\"/gmiu, '"'), kawaiiClarifyValue(choice.split('=>')[1]).replace(/\\"/gmiu, '"')];
+      let opt = [kawaiiClarifyValue(choice.split('=>')[0]).replace(/\\"/gmiu, "\""), kawaiiClarifyValue(choice.split('=>')[1]).replace(/\\"/gmiu, "\"")];
       options.push(opt);
     });
     options.forEach(function(opt) {
@@ -213,37 +245,6 @@ window.Kawaii.addEventListener = function(name, handler) {
   KawaiiEventListeners[name].push(handler);
 }
 
-function kawaiiChangeLockState() {
-  if(window.Kawaii.current.Next) {
-    window.Kawaii.current.Next = !window.Kawaii.current.Next;
-    document.querySelector(".kawaii_next").style.opacity="0.000";
-  } else {
-    window.Kawaii.current.Next = !window.Kawaii.current.Next;
-    document.querySelector(".kawaii_next").style.opacity="1.000";
-  }
-}
-
-function kawaiiClarifyValue(value) {
-  if(typeof value == "string") {
-    if(value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu) !== null&&!/^new/gmiu.test(value)&&!/^"(.*)"$/gmiu.test(value)&&!/^'(.*)'$/gmiu.test(value)) {
-      let parameters=value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu)[0].match(/\(([\s\S]*)\)/giu)[0].replace(/\(|\)| /gmiu, "").split(",");
-      let name=value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu)[0].replace(/\(([\s\S]*)\)/giu, "");
-      return KawaiiFunctions[name](parameters); //return function value
-    } else if (value.match(/"(.*)"/gmiu) !== null) {
-      return value.match(/"(.*)"/gmiu)[0].replace(/"/gmiu, '');
-    } else if (value.match(/'(.*)'/gmiu) !== null) {
-      return value.match(/'(.*)'/gmiu)[0].replace(/'/gmiu, '');
-    } else {
-      if (storyScript["variables"][value.replace(/ /gmiu, "")]["type"] == "variable") {
-        return storyScript["variables"][value.replace(/ /gmiu, "")]["value"];
-      } else {
-        throw new ParseException("Error parsing input! Expected variable of type Variable, but variable of type " + storyScript["variables"][value.replace(' ', '')]["type"] + " given!");
-      }
-    }
-  } else {
-    return value;
-  }
-}
 /**
  * Function that does typewriter effect on the target element.
  */
@@ -300,8 +301,8 @@ function kawaiiReadActsFromString(string) {
     type: KawaiiTypes.ActArray,
     contents: {}
   };
-  string = string.replace(/^([\n])$/gmiu, '').replace(/^([ ]*)$/gmiu, '').replace(/\nACT/gmiu, 'ACT');
-  var data = string.split('/ACT'); //get acts from string as an array
+  string = string.replace(/^([\n])$/gmiu, "").replace(/^([ ]*)$/gmiu, "").replace(/\nACT/gmiu, "ACT");
+  var data = string.split("/ACT"); //get acts from string as an array
   data.forEach(function(act) {
     act = act.split("\n"); //get lines from act as an array
     var actName = act[0].replace(/ACT /gmui, "");
@@ -336,7 +337,7 @@ function kawaiiReadVariableFromString(variable, definition, script) {
   let variableType = definition.match(/.+?(?=\()/gmiu);
   if(variableType !== null) {
     variableType=variableType[0].replace("new ", "");
-    var variableParameters = definition.match(/(\((.*)\))/gmiu)[0].replace(/\(||\)/gmiu, '').split(",");
+    var variableParameters = definition.match(/(\((.*)\))/gmiu)[0].replace(/\(||\)/gmiu, "").split(",");
   } else {
     var variableValue = definition;
   }
