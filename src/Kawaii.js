@@ -507,7 +507,7 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
         window.Kawaii.current.Position++;
       }
     }
-    document.querySelector(target).outerHTML = '<div class="kawaii_container" id="kawaii__' + window.Kawaii.UID.replace(".", "_") + '" align="left" ><audio id="kawaiiaout" src="" autoplay loop></audio><div class="kawaii_viewport"><div class="kawaii_menu" style="display: none;"></div><div class="kawaii_background"></div><div class="kawaii_front" align="center"></div><div class="kawaii_text"><h4 class="kawaii_name"></h4><p class="kawaii_line"></p><ins class="kawaii_next">&#x21db;</ins></div><div class="kawaii_toolbar">&nbsp;&nbsp;<strong class="kawaii_lock"><em>LOCK</em></strong></div></div>';
+    document.querySelector(target).outerHTML = '<div class="kawaii_container" id="kawaii__' + window.Kawaii.UID.replace(".", "_") + '" align="left" ><audio id="kawaiiaout" src="" autoplay loop></audio><div class="kawaii_viewport"><div class="kawaii_menu" style="display: none;"></div><div class="kawaii_background"></div><div class="kawaii_front" align="center"></div><div class="kawaii_text"><h4 class="kawaii_name"></h4><p class="kawaii_line"></p><ins class="kawaii_next">&#x21db;</ins></div><div class="kawaii_toolbar">&nbsp;&nbsp;<a id="KawaiiSaveButton" data-L10n="save-button"></a>&nbsp;&nbsp;<a id="KawaiiLoadButton" data-L10n="load-button"></a><strong class="kawaii_lock"><em>LOCK</em></strong></div></div>';
     document.querySelector(".kawaii_front").addEventListener('click', function() {
       readNext();
     }, {
@@ -516,6 +516,15 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
       'passive': false,
       'mozSystemGroup': true
     }, true, true);
+    document.querySelector("#KawaiiSaveButton").addEventListener('click', KawaiiKeywords.save);
+    document.addEventListener('keydown', function(event) {
+      if(event.keyCode===83) {
+        KawaiiKeywords.save();
+      } else if(event.keyCode===76) {
+        KawaiiKeywords.load();
+      }
+    });
+    document.querySelector("#KawaiiSaveButton").addEventListener('click', KawaiiKeywords.load);
     document.querySelector(".kawaii_menu").addEventListener('click', function(event) {
     document.querySelector(".kawaii_menu").style.display = "none";
     try {

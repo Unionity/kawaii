@@ -10,6 +10,28 @@ let storyScript;
   release: false
 };
 
+function i18n() {
+  const langs={en:"US-eng.lang", ru:"RU-rus.lang", ua:"UA-ukr.lang"};
+  let locale=navigator.language;
+  if(typeof langs[locale]==="undefined") {
+    locale="en";
+  }
+  let request = new XMLHttpRequest();
+  request.open("GET", "lang/"+langs[locale], false);
+  request.send(null);
+  let L10n={};
+  request.responseText.split(",").forEach(function getString(pair) {
+    L10n[pair.split(":")[0]]=pair.split(":")[1];
+  });
+  document.querySelectorAll("[data-L10n]").forEach(function localize(element) {
+    if(typeof L10n[element.dataset.l10n]==="undefined") {
+      element.innerText="L10n fault";
+    } else {
+      element.innerText=L10n[element.dataset.l10n];
+    }
+  });
+}
+
 function kawaiiChangeLockState() {
   if(window.Kawaii.current.Next) {
     window.Kawaii.current.Next = !window.Kawaii.current.Next;
@@ -215,12 +237,10 @@ var KawaiiKeywords = {
         throw new LoadSaveException("Impossible to read save! Save is corrupted or is not compatible with this Kawaii version.");
       }
     }
-    kawaiiChangeLockState();
   },
   save: function() {
-    let savefile=btoa("kwi~CC8C48~D87565~1|||"+window.Kawaii.current.Act+"$"+window.Kawaii.current.Position+"|||"+JSON.stringify(storyScript.variables)+"|||"+JSON.stringify(window.Kawaii.current.Environment)+"|||%|||"+new Date().getTime()+"?");
+    let savefile=btoa("kwi~CC8C48~D87565~1|||"+window.Kawaii.current.Act+"$"+(window.Kawaii.current.Position-1.00)+"|||"+JSON.stringify(storyScript.variables)+"|||"+JSON.stringify(window.Kawaii.current.Environment)+"|||%|||"+new Date().getTime()+"?");
     localStorage[window.Kawaii.UID+"$save"]=savefile;
-    kawaiiChangeLockState();
   }
 }
 
@@ -507,7 +527,8 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
         window.Kawaii.current.Position++;
       }
     }
-    document.querySelector(target).outerHTML = '<div class="kawaii_container" id="kawaii__' + window.Kawaii.UID.replace(".", "_") + '" align="left" ><audio id="kawaiiaout" src="" autoplay loop></audio><div class="kawaii_viewport"><div class="kawaii_menu" style="display: none;"></div><div class="kawaii_background"></div><div class="kawaii_front" align="center"></div><div class="kawaii_text"><h4 class="kawaii_name"></h4><p class="kawaii_line"></p><ins class="kawaii_next">&#x21db;</ins></div><div class="kawaii_toolbar">&nbsp;&nbsp;<strong class="kawaii_lock"><em>LOCK</em></strong></div></div>';
+    document.querySelector(target).outerHTML = '<div class="kawaii_container" id="kawaii__' + window.Kawaii.UID.replace(".", "_") + '" align="left" ><audio id="kawaiiaout" src="" autoplay loop></audio><div class="kawaii_viewport"><div class="kawaii_menu" style="display: none;"></div><div class="kawaii_background"></div><div class="kawaii_front" align="center"></div><div class="kawaii_text"><h4 class="kawaii_name"></h4><p class="kawaii_line"></p><ins class="kawaii_next">&#x21db;</ins></div><div class="kawaii_toolbar">&nbsp;&nbsp;<a id="KawaiiSaveButton" data-L10n="save-button"></a>&nbsp;&nbsp;<a id="KawaiiLoadButton" data-L10n="load-button"></a><strong class="kawaii_lock"><em>LOCK</em></strong></div></div>';
+    i18n(); //Internationalize
     document.querySelector(".kawaii_front").addEventListener('click', function() {
       readNext();
     }, {
@@ -516,6 +537,15 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
       'passive': false,
       'mozSystemGroup': true
     }, true, true);
+    document.querySelector("#KawaiiSaveButton").addEventListener('click', KawaiiKeywords.save);
+    document.addEventListener('keydown', function(event) {
+      if(event.keyCode===83) {
+        KawaiiKeywords.save();
+      } else if(event.keyCode===76) {
+        KawaiiKeywords.load();
+      }
+    });
+    document.querySelector("#KawaiiLoadButton").addEventListener('click', KawaiiKeywords.load);
     document.querySelector(".kawaii_menu").addEventListener('click', function(event) {
     document.querySelector(".kawaii_menu").style.display = "none";
     try {
