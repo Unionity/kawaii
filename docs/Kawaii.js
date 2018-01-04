@@ -59,6 +59,7 @@ var KawaiiFunctions = {
     kawaiiChangeLockState();
   },
   audio(parameters) {
+    window.Kawaii.current.Environment.audio=kawaiiClarifyValue(parameters[0]);
     if(window.Kawaii.current.Configuration.audio=="audiocontext") {
       let file = kawaiiClarifyValue(parameters[0]);
       let request = new XMLHttpRequest();
@@ -130,6 +131,7 @@ var KawaiiFunctions = {
     kawaiiChangeLockState();
   },
   background(parameters) {
+    window.Kawaii.current.Environment.background=kawaiiClarifyValue(parameters[0]);
     document.querySelector(".kawaii_background").innerHTML = "<img src='" + kawaiiClarifyValue(parameters[0]) + "' alt='" + kawaiiClarifyValue(parameters[0]) + "' />";
     kawaiiChangeLockState();
   },
@@ -157,6 +159,7 @@ var KawaiiFunctions = {
     kawaiiChangeLockState();
   },
   video(parameters) {
+    window.Kawaii.current.Environment.video=kawaiiClarifyValue(parameters[0]);
     document.querySelector(".kawaii_background").innerHTML = "<video autoplay nodownload><source src='" + kawaiiClarifyValue(parameters[0]) + "'></source></video>";
     kawaiiChangeLockState();
     window.Kawaii.current.Position++;
@@ -198,6 +201,16 @@ var KawaiiKeywords = {
         window.Kawaii.current.Act=save[1].split("$")[0];
         window.Kawaii.current.Position=save[1].split("$")[1];
         storyScript.variables=JSON.parse(save[2]);
+        let env=JSON.parse(save[3]);
+        if(typeof env.background !== "undefined") {
+          KawaiiFunctions.background([env.background]);
+        }
+        if(typeof env.audio !== "undefined") {
+          KawaiiFunctions.audio([env.audio]);
+        }
+        if(typeof env.video !== "undefined") {
+          KawaiiFunctions.video([env.video]);
+        }
       } else {
         throw new LoadSaveException("Impossible to read save! Save is corrupted or is not compatible with this Kawaii version.");
       }
@@ -205,7 +218,7 @@ var KawaiiKeywords = {
     kawaiiChangeLockState();
   },
   save: function() {
-    let savefile=btoa("kwi~CC8C48~D87565~1|||"+window.Kawaii.current.Act+"$"+window.Kawaii.current.Position+"|||"+JSON.stringify(storyScript.variables)+"|||%|||"+new Date().getTime()+"?");
+    let savefile=btoa("kwi~CC8C48~D87565~1|||"+window.Kawaii.current.Act+"$"+window.Kawaii.current.Position+"|||"+JSON.stringify(storyScript.variables)+"|||"+JSON.stringify(window.Kawaii.current.Environment)+"|||%|||"+new Date().getTime()+"?");
     localStorage[window.Kawaii.UID+"$save"]=savefile;
     kawaiiChangeLockState();
   }
