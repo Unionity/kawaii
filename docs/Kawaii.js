@@ -63,6 +63,36 @@ var KawaiiFunctions = {
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).style.opacity = "1.000";
     kawaiiChangeLockState();
   },
+  stop: function(parameters) {
+    parameters.forEach(function(arg) {
+      switch(kawaiiClarifyValue(arg)) {
+        case "audio":
+        window.Kawaii.current.Environment.audio=undefined;
+        switch(window.Kawaii.current.Configuration.audio) {
+          case "audiocontext":
+          window.Kawaii.current.AudioContext.close().then(function rmContext() {
+            window.Kawaii.current.AudioContext=undefined;
+            window.Kawaii.current.AudioContext=new AudioContext();
+          });
+          break;
+          default:
+          document.querySelector("#kawaiiaout").pause();
+          document.querySelector("#kawaiiaout").src=undefined;
+          break;
+        }
+        break;
+        case "video":
+        window.Kawaii.current.Environment.video=undefined;
+        document.querySelector(".kawaii_background > video").remove();
+        break;
+        case "background":
+        window.Kawaii.current.Environment.background=undefined;
+        document.querySelector(".kawaii_background > img").remove();
+        break;
+      }
+    });
+    kawaiiChangeLockState();
+  },
   mov: function(parameters) {
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).style.right = document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).style.right + parameters[1] + "pt";
     kawaiiChangeLockState();
@@ -412,6 +442,7 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
     window.Kawaii.current.Act = "INIT";
     window.Kawaii.current.Position = 0;
     window.Kawaii.current.Save = "";
+    window.Kawaii.current.Environment = {background: undefined, audio: undefined, video: undefined, characters: []};
     Object.defineProperty(window.Kawaii.current, "Configuration", {
       value: config,
       writable: false,
