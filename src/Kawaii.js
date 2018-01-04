@@ -10,6 +10,28 @@ let storyScript;
   release: false
 };
 
+function i18n() {
+  const langs={en:"US-eng.lang", ru:"RU-rus.lang", ua:"UA-ukr.lang"};
+  let locale=navigator.language;
+  if(typeof langs[locale]==="undefined") {
+    locale="en";
+  }
+  let request = new XMLHttpRequest();
+  request.open("GET", "lang/"+langs[locale], false);
+  request.send(null);
+  let L10n={};
+  request.responseText.split(",").forEach(function getString(pair) {
+    L10n[pair.split(":")[0]]=pair.split(":")[1];
+  });
+  document.querySelectorAll("[data-L10n]").forEach(function localize(element) {
+    if(typeof L10n[element.dataset.l10n]==="undefined") {
+      element.innerText="L10n fault";
+    } else {
+      element.innerText=L10n[element.dataset.l10n];
+    }
+  });
+}
+
 function kawaiiChangeLockState() {
   if(window.Kawaii.current.Next) {
     window.Kawaii.current.Next = !window.Kawaii.current.Next;
@@ -215,12 +237,10 @@ var KawaiiKeywords = {
         throw new LoadSaveException("Impossible to read save! Save is corrupted or is not compatible with this Kawaii version.");
       }
     }
-    kawaiiChangeLockState();
   },
   save: function() {
-    let savefile=btoa("kwi~CC8C48~D87565~1|||"+window.Kawaii.current.Act+"$"+window.Kawaii.current.Position+"|||"+JSON.stringify(storyScript.variables)+"|||"+JSON.stringify(window.Kawaii.current.Environment)+"|||%|||"+new Date().getTime()+"?");
+    let savefile=btoa("kwi~CC8C48~D87565~1|||"+window.Kawaii.current.Act+"$"+(window.Kawaii.current.Position-1.00)+"|||"+JSON.stringify(storyScript.variables)+"|||"+JSON.stringify(window.Kawaii.current.Environment)+"|||%|||"+new Date().getTime()+"?");
     localStorage[window.Kawaii.UID+"$save"]=savefile;
-    kawaiiChangeLockState();
   }
 }
 
@@ -319,7 +339,8 @@ function kawaiiReadActsFromString(string) {
   data.forEach(function(act) {
     act = act.split("\n"); //get lines from act as an array
     var actName = act[0].replace(/ACT /gmui, "");
-    act.splice(0, 1);
+    act.splice(0, 1); //remove ACT INIT
+    act.splice(act.length-1, 1); //remove last newline artifact
     acts["contents"][actName] = {
       type: KawaiiTypes.Act,
       contents: []
@@ -498,16 +519,21 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
       if (window.Kawaii.current.Next) {
         kawaiiChangeLockState();
         try {
-          window.Kawaii.evaluate(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]);
-          KawaiiEventListeners.nextline.forEach(function(func) { func(window.Kawaii.current.Position, window.Kawaii.current.Act, storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]); });
+          if(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]!==undefined) {
+            window.Kawaii.evaluate(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]);
+            KawaiiEventListeners.nextline.forEach(function(func) { func(window.Kawaii.current.Position, window.Kawaii.current.Act, storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]); });
+          } else {
+            alert("End.");
+          }
         } catch(Exception) {
           console.error("Error interpreting script! "+Exception.message+" at Act "+window.Kawaii.current.Act+" line "+window.Kawaii.current.Position+".");
-          kawaiiReportError(Exception.name, Exception.message+" "+Exception.stack);
+          kawaiiReportError(Exception.name, Exception.message+"\nStack trace: \n"+Exception.stack);
         }
         window.Kawaii.current.Position++;
       }
     }
     document.querySelector(target).outerHTML = '<div class="kawaii_container" id="kawaii__' + window.Kawaii.UID.replace(".", "_") + '" align="left" ><audio id="kawaiiaout" src="" autoplay loop></audio><div class="kawaii_viewport"><div class="kawaii_menu" style="display: none;"></div><div class="kawaii_background"></div><div class="kawaii_front" align="center"></div><div class="kawaii_text"><h4 class="kawaii_name"></h4><p class="kawaii_line"></p><ins class="kawaii_next">&#x21db;</ins></div><div class="kawaii_toolbar">&nbsp;&nbsp;<a id="KawaiiSaveButton" data-L10n="save-button"></a>&nbsp;&nbsp;<a id="KawaiiLoadButton" data-L10n="load-button"></a><strong class="kawaii_lock"><em>LOCK</em></strong></div></div>';
+    i18n(); //Internationalize
     document.querySelector(".kawaii_front").addEventListener('click', function() {
       readNext();
     }, {
@@ -524,7 +550,7 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
         KawaiiKeywords.load();
       }
     });
-    document.querySelector("#KawaiiSaveButton").addEventListener('click', KawaiiKeywords.load);
+    document.querySelector("#KawaiiLoadButton").addEventListener('click', KawaiiKeywords.load);
     document.querySelector(".kawaii_menu").addEventListener('click', function(event) {
     document.querySelector(".kawaii_menu").style.display = "none";
     try {

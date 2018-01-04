@@ -339,7 +339,8 @@ function kawaiiReadActsFromString(string) {
   data.forEach(function(act) {
     act = act.split("\n"); //get lines from act as an array
     var actName = act[0].replace(/ACT /gmui, "");
-    act.splice(0, 1);
+    act.splice(0, 1); //remove ACT INIT
+    act.splice(act.length-1, 1); //remove last newline artifact
     acts["contents"][actName] = {
       type: KawaiiTypes.Act,
       contents: []
@@ -518,11 +519,15 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
       if (window.Kawaii.current.Next) {
         kawaiiChangeLockState();
         try {
-          window.Kawaii.evaluate(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]);
-          KawaiiEventListeners.nextline.forEach(function(func) { func(window.Kawaii.current.Position, window.Kawaii.current.Act, storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]); });
+          if(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]!==undefined) {
+            window.Kawaii.evaluate(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]);
+            KawaiiEventListeners.nextline.forEach(function(func) { func(window.Kawaii.current.Position, window.Kawaii.current.Act, storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]); });
+          } else {
+            alert("End.");
+          }
         } catch(Exception) {
           console.error("Error interpreting script! "+Exception.message+" at Act "+window.Kawaii.current.Act+" line "+window.Kawaii.current.Position+".");
-          kawaiiReportError(Exception.name, Exception.message+" "+Exception.stack);
+          kawaiiReportError(Exception.name, Exception.message+"\nStack trace: \n"+Exception.stack);
         }
         window.Kawaii.current.Position++;
       }
