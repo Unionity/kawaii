@@ -1,8 +1,10 @@
 "use strict";
+window.Kawaii={};
 let storyScript;
 /**
  * Metadata about engine version
  */
+ 
  const kawaiiMeta = {
   version: "0.0.0.1alpha",
   versionCode: 1,
@@ -63,6 +65,7 @@ function kawaiiClarifyValue(value) {
     return value;
   }
 }
+
 /**
  * Functions, types, statements...
  */
@@ -210,6 +213,7 @@ var KawaiiFunctions = {
     document.querySelector(".kawaii_menu").style.display = "initial";
   }
 }
+
 var KawaiiKeywords = {
   die: function() {
     document.querySelector(".kawaii_container").outerHTML="";
@@ -264,18 +268,6 @@ function InterpretException(message) {
 function LoadSaveException(message) {
   this.message = message;
   this.name = "Fatal saving data exception";
-}
-
-window.Kawaii.addKeyword = function(name, handler) {
-  KawaiiKeywords[name]=handler;
-}
-
-window.Kawaii.addFunction = function(name, handler) {
-  KawaiiFunctions[name]=handler;
-}
-
-window.Kawaii.addEventListener = function(name, handler) {
-  KawaiiEventListeners[name].push(handler);
 }
 
 /**
@@ -415,62 +407,85 @@ function kawaiiReadScriptFromString(script) {
   };
 }
 
-function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath) {
-  script=script.replace(/(rem (.*))|(\(\*(.*)*\*\))|(\$!(.*))/gmiu, ""); //remove comments
-  if ("undefined" !== typeof scriptPath) {
-    this.story = kawaiiReadScriptFromFile(scriptPath);
-  } else {
+class Kawaii {
+  constructor(config, target, script) {
+    script=script.replace(/(rem (.*))|(\(\*(.*)*\*\))|(\$!(.*))/gmiu, ""); //remove comments
+    this.config = config;
+    this.target = document.querySelector(target);
     this.story = kawaiiReadScriptFromString(script);
-  }
-  this.config = config;
-  this.target = target;
-  this.setConfig = function(configurationPath) {
-    this.config = configurationPath;
-  };
-  this.setTargetElement = function(targetElement) {
-    this.target = document.querySelector(targetElement);
-  };
-  this.start = function() {
-    /**
-     * Line interpreter
-     */
-    window.Kawaii.evaluate = function(statement) {
-      switch(statement["type"]) {
-        case 2: //@Function()
-        if(typeof KawaiiFunctions[statement["name"]] == "undefined") {
-          throw new InterpretException("Function "+statement["name"]+" is not defined!!");
-        } else {
-          KawaiiFunctions[statement["name"]](statement["parameters"]);
-        }
-        break;
-        case 3: //Keywords
-        if(typeof KawaiiKeywords[statement["name"]] == "undefined") {
-          throw new InterpretException("Keyword "+statement["name"]+" is not defined!!");
-        } else {
-          KawaiiKeywords[statement["name"]]();
-        }
-        break;
-        case 4: //variable defenition
-        kawaiiReadVariableFromString(statement["name"], statement["definition"], storyScript);
-        window.Kawaii.current.Position++;
-        window.Kawaii.evaluate(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]);
-        break;
-        case 6:
-        if(storyScript["variables"][statement["character"]]["type"]=="character") {
-          document.querySelector(".kawaii_name").style.color=storyScript["variables"][statement["character"]]["color"];
-          document.querySelector(".kawaii_name").innerHTML=storyScript["variables"][statement["character"]]["name"];
-          kawaiiTypewriter(kawaiiClarifyValue(statement["text"]), ".kawaii_line");
-          setTimeout(function(){kawaiiChangeLockState();}, kawaiiClarifyValue(statement["text"]).length*25);
-        } else {
-           throw ParseException("Error parsing input! Expected variable of type Character, but variable of type "+storyScript["variables"][statement[0].replace(' ','')]["type"]+" given!");
-        }
-        break;
-        default:
-        throw new InterpretException("Invalid statement occured!");
-        break;
-      }
+    
+    window.Kawaii.addKeyword = function(name, handler) {
+      KawaiiKeywords[name]=handler;
     }
+
+    window.Kawaii.addFunction = function(name, handler) {
+      KawaiiFunctions[name]=handler;
+    }
+
+    window.Kawaii.addEventListener = function(name, handler) {
+      KawaiiEventListeners[name].push(handler);
+    }
+    
     storyScript = this.story;
+  }
+  
+  evaluate(statement) {
+    switch(statement["type"]) {
+      case 2: //@Function()
+      if(typeof KawaiiFunctions[statement["name"]] == "undefined") {
+        throw new InterpretException("Function "+statement["name"]+" is not defined!!");
+      } else {
+        KawaiiFunctions[statement["name"]](statement["parameters"]);
+      }
+      break;
+      case 3: //Keywords
+      if(typeof KawaiiKeywords[statement["name"]] == "undefined") {
+        throw new InterpretException("Keyword "+statement["name"]+" is not defined!!");
+      } else {
+        KawaiiKeywords[statement["name"]]();
+      }
+      break;
+      case 4: //variable defenition
+      kawaiiReadVariableFromString(statement["name"], statement["definition"], storyScript);
+      window.Kawaii.current.Position++;
+      this.evaluate(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]);
+      break;
+      case 6:
+      if(storyScript["variables"][statement["character"]]["type"]=="character") {
+        document.querySelector(".kawaii_name").style.color=storyScript["variables"][statement["character"]]["color"];
+        document.querySelector(".kawaii_name").innerHTML=storyScript["variables"][statement["character"]]["name"];
+        kawaiiTypewriter(kawaiiClarifyValue(statement["text"]), ".kawaii_line");
+        setTimeout(function(){kawaiiChangeLockState();}, kawaiiClarifyValue(statement["text"]).length*25);
+      } else {
+         throw ParseException("Error parsing input! Expected variable of type Character, but variable of type "+storyScript["variables"][statement[0].replace(' ','')]["type"]+" given!");
+      }
+      break;
+      default:
+      throw new InterpretException("Invalid statement occured!");
+      break;
+    }
+  }
+  
+  readNext() {
+    if (window.Kawaii.current.Next) {
+      kawaiiChangeLockState();
+      try {
+        if(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]!==undefined) {
+          this.evaluate(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]);
+          KawaiiEventListeners.nextline.forEach(function(func) { func(window.Kawaii.current.Position, window.Kawaii.current.Act, storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]); });
+        } else {
+          alert("End.");
+        }
+      } catch(Exception) {
+        console.error("Error interpreting script! "+Exception.message+" at Act "+window.Kawaii.current.Act+" line "+window.Kawaii.current.Position+".");
+        kawaiiReportError(Exception.name, Exception.message+"\nStack trace: \n"+Exception.stack);
+      }
+      window.Kawaii.current.Position++;
+    }
+  }
+  
+  start() {
+    let instance=this;
     window.Kawaii.current={};
     window.Kawaii.current.AudioContext = new AudioContext();
     window.Kawaii.current.Next = true;
@@ -478,71 +493,40 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
     window.Kawaii.current.Position = 0;
     window.Kawaii.current.Save = "";
     window.Kawaii.current.Environment = {background: undefined, audio: undefined, video: undefined, characters: []};
+    
     Object.defineProperty(window.Kawaii.current, "Configuration", {
-      value: config,
+      value: this.config,
       writable: false,
       enumerable: true,
       configurable: false
     });
+    
     Object.defineProperty(window.Kawaii, "UID", {
-      value: btoa(config.UID),
+      value: btoa(this.config.UID),
       writable: false,
       enumerable: false,
       configurable: false
     });
-    var DEFAULT_KEY = {
-      alg: "A256CTR",
-      ext: true,
-      k: "b5kAYh5q8C7Se2JnaCxRj_gaFHF7n80QY7Jdue0s5uI",
-      key_ops: ["encrypt", "decrypt", "wrapKey", "unwrapKey"],
-      kty: "oct"
-    };
-    if (window.isSecureContext) {
-      window.crypto.subtle.importKey("jwk", {
-        kty: "oct",
-        k: "b5kAYh5q8C7Se2JnaCxRj_gaFHF7n80QY7Jdue0s5uI",
-        alg: "A256CTR",
-        ext: true
-      }, {
-        name: "AES-CTR"
-      }, true, ["encrypt", "decrypt", "wrapKey", "unwrapKey"]).then(function(key) {
-        DEFAULT_KEY = key;
-      });
-    } else {
-      console.warn("Warning! Context is not secure, so encrypted saves is disabled!");
-    }
+    
     if (storyScript["script"]["type"]!==0) {
       console.error("Script does not appears to be of type ActArray! Type 0 (ActArray) expected, but "+storyScript["type"]+" given!");
       return false;
     }
-    function readNext() {
-      if (window.Kawaii.current.Next) {
-        kawaiiChangeLockState();
-        try {
-          if(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]!==undefined) {
-            window.Kawaii.evaluate(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]);
-            KawaiiEventListeners.nextline.forEach(function(func) { func(window.Kawaii.current.Position, window.Kawaii.current.Act, storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]); });
-          } else {
-            alert("End.");
-          }
-        } catch(Exception) {
-          console.error("Error interpreting script! "+Exception.message+" at Act "+window.Kawaii.current.Act+" line "+window.Kawaii.current.Position+".");
-          kawaiiReportError(Exception.name, Exception.message+"\nStack trace: \n"+Exception.stack);
-        }
-        window.Kawaii.current.Position++;
-      }
-    }
-    document.querySelector(target).outerHTML = '<div class="kawaii_container" id="kawaii__' + window.Kawaii.UID.replace(".", "_") + '" align="left" ><audio id="kawaiiaout" src="" autoplay loop></audio><div class="kawaii_viewport"><div class="kawaii_menu" style="display: none;"></div><div class="kawaii_background"></div><div class="kawaii_front" align="center"></div><div class="kawaii_text"><h4 class="kawaii_name"></h4><p class="kawaii_line"></p><ins class="kawaii_next">&#x21db;</ins></div><div class="kawaii_toolbar">&nbsp;&nbsp;<a id="KawaiiSaveButton" data-L10n="save-button"></a>&nbsp;&nbsp;<a id="KawaiiLoadButton" data-L10n="load-button"></a><strong class="kawaii_lock"><em>LOCK</em></strong></div></div>';
+
+    this.target.outerHTML = '<div class="kawaii_container" id="kawaii__' + window.Kawaii.UID.replace(".", "_") + '" align="left" ><audio id="kawaiiaout" src="" autoplay loop></audio><div class="kawaii_viewport"><div class="kawaii_menu" style="display: none;"></div><div class="kawaii_background"></div><div class="kawaii_front" align="center"></div><div class="kawaii_text"><h4 class="kawaii_name"></h4><p class="kawaii_line"></p><ins class="kawaii_next">&#x21db;</ins></div><div class="kawaii_toolbar">&nbsp;&nbsp;<a id="KawaiiSaveButton" data-L10n="save-button"></a>&nbsp;&nbsp;<a id="KawaiiLoadButton" data-L10n="load-button"></a><strong class="kawaii_lock"><em>LOCK</em></strong></div></div>';
     i18n(); //Internationalize
+    
     document.querySelector(".kawaii_front").addEventListener('click', function() {
-      readNext();
+      instance.readNext();
     }, {
       'capture': true,
       'once': false,
       'passive': false,
       'mozSystemGroup': true
     }, true, true);
+    
     document.querySelector("#KawaiiSaveButton").addEventListener('click', KawaiiKeywords.save);
+    
     document.addEventListener('keydown', function(event) {
       if(event.keyCode===83) {
         KawaiiKeywords.save();
@@ -550,15 +534,18 @@ function Kawaii(config = {}, target = "#kawaii_default", script = "", scriptPath
         KawaiiKeywords.load();
       }
     });
+    
     document.querySelector("#KawaiiLoadButton").addEventListener('click', KawaiiKeywords.load);
     document.querySelector(".kawaii_menu").addEventListener('click', function(event) {
     document.querySelector(".kawaii_menu").style.display = "none";
+    
     try {
-      window.Kawaii.evaluate(kawaiiReadStatement(atob(event.target.dataset.code)));
+      instance.evaluate(kawaiiReadStatement(atob(event.target.dataset.code)));
     } catch(Exception) {
       console.error("Error interpreting script! "+Exception.message+" at Act "+window.Kawaii.current.Act+" line "+window.Kawaii.current.Position+".");
       kawaiiReportError(Exception.name, Exception.message);
     }
+    
     readNext();
     }, {
       'capture': true,
