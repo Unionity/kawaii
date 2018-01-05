@@ -46,7 +46,15 @@ function kawaiiChangeLockState() {
 
 function kawaiiClarifyValue(value) {
   if(typeof value == "string") {
-    if(value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu) !== null&&!/^new/gmiu.test(value)&&!/^"(.*)"$/gmiu.test(value)&&!/^'(.*)'$/gmiu.test(value)) {
+    if(value.match(/new (.*)/gmiu) !== null) {
+      let constructorName = value.match(/^new [\s\S]*/gmiu)[0].replace("new ", "").match(/.+?(?=\()/gmiu)[0];
+      let constructorArgs = value.match(/(\((.*)\))/gmiu)[0].replace(/\(||\)/gmiu, "").split(",");
+      if(typeof KawaiiClasses[constructorName] !== "undefined") {
+        return KawaiiClasses[constructorName](constructorArgs);
+      } else {
+        throw new ParseException("Error parsing input! Undefined class "+constructorName);
+      }        
+    } else if(value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu) !== null&&!/^new/gmiu.test(value)&&!/^"(.*)"$/gmiu.test(value)&&!/^'(.*)'$/gmiu.test(value)) {
       let parameters=value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu)[0].match(/\(([\s\S]*)\)/giu)[0].replace(/\(|\)| /gmiu, "").split(",");
       let name=value.match(/[A-z_\$~]{1,}\([\s\S]*\)/gmiu)[0].replace(/\(([\s\S]*)\)/giu, "");
       return KawaiiFunctions[name](parameters); //return function value
@@ -55,11 +63,7 @@ function kawaiiClarifyValue(value) {
     } else if (value.match(/'(.*)'/gmiu) !== null) {
       return value.match(/'(.*)'/gmiu)[0].replace(/'/gmiu, '');
     } else {
-      if (storyScript["variables"][value.replace(/ /gmiu, "")]["type"] === "variable") {
-        return storyScript["variables"][value.replace(/ /gmiu, "")]["value"];
-      } else {
-        throw new ParseException("Error parsing input! Expected variable of type Variable, but variable of type " + storyScript["variables"][value.replace(' ', '')]["type"] + " given!");
-      }
+      return storyScript["variables"][value.replace(/ /gmiu, "")];
     }
   } else {
     return value;
@@ -76,6 +80,18 @@ const KawaiiTypes = {
   Keyword: 3, //keyword
   VariableDefenition: 4, //$a=Character();
   Speech: 6, //a: "b"
+}
+
+var KawaiiClasses = {
+  Character(args) {
+    return {
+      type: "character",
+      name: kawaiiClarifyValue(args[0]),
+      color: kawaiiClarifyValue(args[1]),
+      folder: kawaiiClarifyValue(args[2]),
+      extension: kawaiiClarifyValue(args[3])
+    };
+  }
 }
 
 var KawaiiFunctions = {
@@ -301,13 +317,13 @@ function kawaiiReadStatement(line) {
       character: line.split(":")[0],
       text: line.split(":")[1]
     };
-  } else if (/^\$/gmiu.test(line)) {
+  } else if (/^(.* .*=.*)/gmiu.test(line)) {
     return {
       type: KawaiiTypes.VariableDefenition,
       name: line.split("=")[0].replace(/\$/gmiu, ""),
       definition: line.split("=")[1]
     };
-  } else if (/^@/gmiu.test(line)) {
+  } else if (/[A-z_\$~]{1,}\([\s\S]*\)/gmiu.test(line)) {
     return {
       type: KawaiiTypes.Function,
       name: line.replace("@", "").match(/.+?(?=\()/gmiu)[0],
@@ -356,53 +372,22 @@ function kawaiiReportError(name, message) {
 }
 
 function kawaiiReadVariableFromString(variable, definition, script) {
-  variable = variable.replace(/\$/gmiu, '');
   if (typeof definition == "undefined") {
     throw new ParseException("Invalid variable defenition!");
   }
-  let variableType = definition.match(/.+?(?=\()/gmiu);
-  if(variableType !== null) {
-    variableType=variableType[0].replace("new ", "");
-    var variableParameters = definition.match(/(\((.*)\))/gmiu)[0].replace(/\(||\)/gmiu, "").split(",");
-  } else {
-    var variableValue = definition;
-  }
-  switch (variableType) {
-    case "Character":
-    if (variableParameters.length == 4) {
-      script["variables"][variable] = {
-        type: "character",
-        name: kawaiiClarifyValue(variableParameters[0]),
-        color: kawaiiClarifyValue(variableParameters[1]),
-        folder: kawaiiClarifyValue(variableParameters[2]),
-        extension: kawaiiClarifyValue(variableParameters[3])
-      };
-    } else {
-      throw new ParseException("Character constructor expects 4 parameters, but " + variableParameters.length + " given!");
-    }
-    break;
-    case "Alias":
-    script["variables"][variable] = {
-      type: "alias",
-      value: variableParameters[0].replace(/"/gmiu, "")
-    };
-    break;
-    case "Variable":
-    script["variables"][variable] = {
-      type: "variable",
-      value: variableParameters[0].replace(/"/gmiu, "")
-    };
-    break;
-    default:
-    script["variables"][variable] = {value: kawaiiClarifyValue(variableValue), type: "variable"};
-    break;
-  }
+  let variableType = variable.split(" ")[0];
+  let constructorType = definition.match(/.+?(?=\()/gmiu);
+  if(constructorType !== null) constructorType=constructorType[0].replace("new ", "");
+  let variableValue=definition;
+  let variableInternalType = constructorType==null ? "variable" : constructorType.toLowerCase();
+  if(variableType !== constructorType&&constructorType !== null&&variableType !== "var") return false;
+  script["variables"][variable.split(" ")[1]] = kawaiiClarifyValue(variableValue);
   return true;
 }
 
 function kawaiiReadScriptFromString(script) {
   return {
-    variables: {"true": {type:"variable", value: true}, "false": {type:"variable", value: false}, "null": {type:"variable", value: undefined}, "___ENGINE_VERSION___": {type:"variable", value: kawaiiMeta.version}},
+    variables: {"true": true, "false": false, "null": undefined, "___ENGINE_VERSION___": kawaiiMeta.version},
     script: kawaiiReadActsFromString(script)
   };
 }
@@ -431,7 +416,7 @@ class Kawaii {
   
   evaluate(statement) {
     switch(statement["type"]) {
-      case 2: //@Function()
+      case 2: //Function()
       if(typeof KawaiiFunctions[statement["name"]] == "undefined") {
         throw new InterpretException("Function "+statement["name"]+" is not defined!!");
       } else {
@@ -451,6 +436,9 @@ class Kawaii {
       this.evaluate(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]);
       break;
       case 6:
+      if(storyScript["variables"][statement["character"]]==undefined) {
+        throw new ParseException("Variable is not declared!");
+      }
       if(storyScript["variables"][statement["character"]]["type"]=="character") {
         document.querySelector(".kawaii_name").style.color=storyScript["variables"][statement["character"]]["color"];
         document.querySelector(".kawaii_name").innerHTML=storyScript["variables"][statement["character"]]["name"];
