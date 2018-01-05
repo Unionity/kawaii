@@ -436,12 +436,9 @@ class Kawaii {
       this.evaluate(storyScript["script"]["contents"][window.Kawaii.current.Act]["contents"][window.Kawaii.current.Position]);
       break;
       case 6:
-      if(storyScript["variables"][statement["character"]]==undefined) {
-        throw new ParseException("Variable is not declared!");
-      }
-      if(storyScript["variables"][statement["character"]]["type"]=="character") {
-        document.querySelector(".kawaii_name").style.color=storyScript["variables"][statement["character"]]["color"];
-        document.querySelector(".kawaii_name").innerHTML=storyScript["variables"][statement["character"]]["name"];
+      if(kawaiiClarifyValue(statement["character"]).type=="character") {
+        document.querySelector(".kawaii_name").style.color=kawaiiClarifyValue(statement["character"]).color;
+        document.querySelector(".kawaii_name").innerHTML=kawaiiClarifyValue(statement["character"]).name;
         kawaiiTypewriter(kawaiiClarifyValue(statement["text"]), ".kawaii_line");
         setTimeout(function(){kawaiiChangeLockState();}, kawaiiClarifyValue(statement["text"]).length*25);
       } else {
