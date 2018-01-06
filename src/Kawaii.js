@@ -96,6 +96,7 @@ var KawaiiClasses = {
 
 var KawaiiFunctions = {
   appear(parameters) {
+    if(!(parameters[1]||typeof parameters[1] == undefined)) window.Kawaii.current.Environment.characters[parameters[0]]={hidden: false, sprite: "index", pos: 0, filters: {}};
     document.querySelector(".kawaii_front").innerHTML += "<img id='kawaii_CHARACTERSPRITE___" + parameters[0] + "' src='" + storyScript["variables"][parameters[0]]["folder"] + "/index." + storyScript["variables"][parameters[0]]["extension"] + "' />";
     kawaiiChangeLockState();
   },
@@ -126,14 +127,17 @@ var KawaiiFunctions = {
     }
   },
   dispose(parameters) {
+    window.Kawaii.current.Environment.characters[parameters[0]]=undefined;
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).outerHTML = "";
     kawaiiChangeLockState();
   },
   hide(parameters) {
+    window.Kawaii.current.Environment.characters[parameters[0]].hidden=true;
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).style.opacity = "0.000";
     kawaiiChangeLockState();
   },
   show(parameters) {
+    window.Kawaii.current.Environment.characters[parameters[0]].hidden=false;
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).style.opacity = "1.000";
     kawaiiChangeLockState();
   },
@@ -168,6 +172,7 @@ var KawaiiFunctions = {
     kawaiiChangeLockState();
   },
   mov(parameters) {
+    window.Kawaii.current.Environment.characters[parameters[0]].pos=parameters[1];
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).style.right = document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).style.right + parameters[1] + "pt";
     kawaiiChangeLockState();
   },
@@ -177,6 +182,7 @@ var KawaiiFunctions = {
     kawaiiChangeLockState();
   },
   sprite(parameters) {
+    window.Kawaii.current.Environment.characters[parameters[0]].sprite=kawaiiClarifyValue(parameters[1]);
     document.querySelector("#kawaii_CHARACTERSPRITE___" + parameters[0]).src = storyScript["variables"][parameters[0]].folder + "/" + kawaiiClarifyValue(parameters[1]) + "." + storyScript["variables"][parameters[0]].extension;
     kawaiiChangeLockState();
   },
@@ -219,7 +225,7 @@ var KawaiiFunctions = {
     let options = [];
     let htmlOptions = "";
     parameters.forEach(function(choice) {
-      let opt = [kawaiiClarifyValue(choice.split('=>')[0]).replace(/\\"/gmiu, "\""), kawaiiClarifyValue(choice.split('=>')[1]).replace(/\\"/gmiu, "\"")];
+      let opt = [kawaiiClarifyValue(choice.split('->')[0]).replace(/\\"/gmiu, "\""), kawaiiClarifyValue(choice.split('->')[1]).replace(/\\"/gmiu, "\"")];
       options.push(opt);
     });
     options.forEach(function(opt) {
@@ -231,10 +237,10 @@ var KawaiiFunctions = {
 }
 
 var KawaiiKeywords = {
-  die: function() {
+  die() {
     document.querySelector(".kawaii_container").outerHTML="";
   },
-  load: function() {
+  load() {
     if(typeof localStorage[window.Kawaii.UID+"$save"]=="undefined") {
       throw new LoadSaveException("Impossible to read save with no save present!");
     } else {
@@ -245,20 +251,40 @@ var KawaiiKeywords = {
         storyScript.variables=JSON.parse(save[2]);
         let env=JSON.parse(save[3]);
         if(typeof env.background !== "undefined") {
-          KawaiiFunctions.background([env.background]);
+          KawaiiFunctions.background(['"'+env.background+'"']);
         }
         if(typeof env.audio !== "undefined") {
-          KawaiiFunctions.audio([env.audio]);
+          KawaiiFunctions.audio(['"'+env.audio+'"']);
         }
         if(typeof env.video !== "undefined") {
-          KawaiiFunctions.video([env.video]);
+          KawaiiFunctions.video(['"'+env.video+'"']);
+        }
+        if(env.characters !== {}) {
+          window.Kawaii.current.Environment.characters=env.characters;
+          for(var name in env.characters) {
+            if(env.characters.hasOwnProperty(name)) {
+              let character = env.characters[name];
+              KawaiiFunctions.appear([name, true]);
+              if(typeof env.characters[name].sprite !== "undefined") {
+                let sprite = env.characters[name].sprite;
+                KawaiiFunctions.sprite([name, "'"+sprite+"'"]);
+              }
+              if(env.characters[name].hidden) {
+                KawaiiFunctions.hide([name]);
+                kawaiiChangeLockState();
+              }
+              KawaiiFunctions.mov([name, env.characters[name].pos]);
+              kawaiiChangeLockState();
+            }
+          }
         }
       } else {
         throw new LoadSaveException("Impossible to read save! Save is corrupted or is not compatible with this Kawaii version.");
       }
     }
+    kawaiiChangeLockState();
   },
-  save: function() {
+  save() {
     let savefile=btoa("kwi~CC8C48~D87565~1|||"+window.Kawaii.current.Act+"$"+(window.Kawaii.current.Position-1.00)+"|||"+JSON.stringify(storyScript.variables)+"|||"+JSON.stringify(window.Kawaii.current.Environment)+"|||%|||"+new Date().getTime()+"?");
     localStorage[window.Kawaii.UID+"$save"]=savefile;
   }
@@ -415,6 +441,7 @@ class Kawaii {
   }
   
   evaluate(statement) {
+    console.log(statement);
     switch(statement["type"]) {
       case 2: //Function()
       if(typeof KawaiiFunctions[statement["name"]] == "undefined") {
@@ -477,7 +504,7 @@ class Kawaii {
     window.Kawaii.current.Act = "INIT";
     window.Kawaii.current.Position = 0;
     window.Kawaii.current.Save = "";
-    window.Kawaii.current.Environment = {background: undefined, audio: undefined, video: undefined, characters: []};
+    window.Kawaii.current.Environment = {background: undefined, audio: undefined, video: undefined, characters: {undef: undefined}};
     
     Object.defineProperty(window.Kawaii.current, "Configuration", {
       value: this.config,
