@@ -237,9 +237,15 @@ var KawaiiFunctions = {
 }
 
 var KawaiiKeywords = {
+  /**
+  * Removes novel
+  */
   die() {
     document.querySelector(".kawaii_container").outerHTML="";
   },
+  /** 
+  * Loads save if exists
+  */
   load() {
     if(typeof localStorage[window.Kawaii.UID+"$save"]=="undefined") {
       throw new LoadSaveException("Impossible to read save with no save present!");
@@ -284,6 +290,9 @@ var KawaiiKeywords = {
     }
     kawaiiChangeLockState();
   },
+  /**
+  * Saves
+  */
   save() {
     let savefile=btoa("kwi~CC8C48~D87565~1|||"+window.Kawaii.current.Act+"$"+(window.Kawaii.current.Position-1.00)+"|||"+JSON.stringify(storyScript.variables)+"|||"+JSON.stringify(window.Kawaii.current.Environment)+"|||%|||"+new Date().getTime()+"?");
     localStorage[window.Kawaii.UID+"$save"]=savefile;
@@ -314,6 +323,10 @@ function LoadSaveException(message) {
 
 /**
  * Function that does typewriter effect on the target element.
+ * @param {String} txt the text
+ * @param {Element} target target
+ * @param {Number} delay delay between characters printing
+ * @private
  */
 function kawaiiTypewriter(txt, target, delay = 25) {
   let i = 0;
@@ -418,28 +431,61 @@ function kawaiiReadScriptFromString(script) {
   };
 }
 
+/**
+* Main Kawaii class
+* @example
+* const novel = new Kawaii({id: "sample", audio: "audiocontext"}, "#sample", sampleScript);
+*/
 class Kawaii {
+  /**
+  * Kawaii novel constructor
+  * @param {Object} config Your configuration
+  * @param {String} target element (CSS Selector syntax)
+  * @param {String} script
+  * @public
+  */
   constructor(config, target, script) {
     script=script.replace(/(rem (.*))|(\(\*(.*)*\*\))|(\$!(.*))/gmiu, ""); //remove comments
     this.config = config;
     this.target = document.querySelector(target);
     this.story = kawaiiReadScriptFromString(script);
-    
+    /**
+    * Used to add custom keyword to interpreter
+    * @param {String} name keyword name
+    * @param {function} handler
+    * @example window.Kawaii.addKeyword("alert", function() {alert("Hello world!");});
+    * @public
+    */
     window.Kawaii.addKeyword = function(name, handler) {
       KawaiiKeywords[name]=handler;
     }
-
+    /**
+    * Used to add custom function to interpreter
+    * @param {String} name keyword name
+    * @param {function(args: String[])} handler
+    * @example window.Kawaii.addFunction("logMyArgs", function(args) {console.log(args);});
+    * @public
+    */
     window.Kawaii.addFunction = function(name, handler) {
       KawaiiFunctions[name]=handler;
     }
-
+    /**
+    * Add event listener
+    * @param {String} name event name
+    * @param {function(event)} event handler
+    * @example window.Kawaii.addEventListener("load", function(Event) {alert("Loaded save!");});
+    * @public
+    */
     window.Kawaii.addEventListener = function(name, handler) {
       KawaiiEventListeners[name].push(handler);
     }
     
     storyScript = this.story;
   }
-  
+  /**
+  * Interpreter function
+  * @protected
+  */
   evaluate(statement) {
     console.log(statement);
     switch(statement["type"]) {
@@ -477,7 +523,10 @@ class Kawaii {
       break;
     }
   }
-  
+  /**
+  * Interprets next line
+  * @protected
+  */
   readNext() {
     if (window.Kawaii.current.Next) {
       kawaiiChangeLockState();
@@ -495,8 +544,13 @@ class Kawaii {
       window.Kawaii.current.Position++;
     }
   }
-  
-  start() {
+  /**
+  * Starts the novel
+  * @param {String} arguments
+  * @experemental
+  * @public
+  */
+  start(args) {
     let instance=this;
     window.Kawaii.current={};
     window.Kawaii.current.AudioContext = new AudioContext();
